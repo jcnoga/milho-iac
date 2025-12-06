@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRA Milho - Profissional</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- HTML2PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --dark-green: #1b5e20;
+            --light-green: #e8f5e9;
+            --highlight-border: #43a047;
+            --locked-bg: #e9ecef;
+        }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        /* CABEÇALHO */
+        .header-app {
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* CARDS */
+        .card-custom {
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            background: white;
+        }
+        .section-header {
+            background-color: var(--light-green);
+            color: var(--dark-green);
+            padding: 12px 20px;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(46, 125, 50, 0.2);
+            display: flex;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* INPUTS E ESTADOS */
+        .form-label { font-weight: 600; font-size: 0.9rem; color: #555; margin-bottom: 4px; }
+        .form-control, .form-select { border: 1px solid #ccc; padding: 10px; border-radius: 6px; }
+        .form-control:focus, .form-select:focus { border-color: var(--highlight-border); box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15); }
+        .demo-locked { pointer-events: none; background-color: var(--locked-bg) !important; color: #6c757d; }
+
+        /* AUTH */
+        .auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(240, 242, 245, 0.98); z-index: 9999;
+            display: flex; align-items: center; justify-content: center; overflow-y: auto;
+        }
+        .auth-card {
+            background: white; padding: 2rem; border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px;
+        }
+
+        /* RELATÓRIO TELA */
+        .report-box {
+            font-family: 'Segoe UI', sans-serif;
+            white-space: pre-wrap; background: #fff;
+            border: 1px solid #ced4da; padding: 25px;
+            border-radius: 8px; font-size: 0.95rem; line-height: 1.6;
+            color: #212529;
+        }
+
+        /* TABELAS */
+        .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
+
+        /* PDF HIDDEN CONTAINER (ESTILO PARA IMPRESSÃO) */
+        #pdf-hidden-container {
+            display: none; /* Escondido da tela normal */
+        }
+        
+        /* Classe aplicada temporariamente durante a geração do PDF */
+        .pdf-visible-mode {
+            display: block !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 210mm; /* Largura A4 */
+            background: white;
+            z-index: 99999;
+            padding: 20mm;
+        }
+
+        .pdf-header-title { color: #1b5e20; font-size: 22px; font-weight: bold; border-bottom: 2px solid #1b5e20; padding-bottom: 10px; margin-bottom: 20px; }
+        .pdf-sub-header { color: #555; font-size: 12px; margin-bottom: 5px; }
+        .pdf-section { margin-bottom: 15px; }
+        .pdf-section-title { background-color: #e8f5e9; color: #1b5e20; padding: 5px 10px; font-weight: bold; font-size: 14px; margin-bottom: 8px; border-left: 5px solid #1b5e20; }
+        .pdf-text { font-size: 12px; line-height: 1.5; color: #000; text-align: justify; }
+        .pdf-footer { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 10px; color: #777; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH OVERLAY -->
+    <div id="authScreen" class="auth-overlay">
+        <!-- Login -->
+        <div id="loginForm" class="auth-card">
+            <div class="text-center mb-4">
+                <i class="fas fa-cloud text-success fa-3x"></i>
+                <h3 class="fw-bold mt-2">SRA Milho Online</h3>
+                <p class="text-muted small">Acesso Profissional</p>
+            </div>
+            <div class="mb-3">
+                <label>E-mail</label>
+                <input type="email" id="loginEmail" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label>Senha</label>
+                <input type="password" id="loginPass" class="form-control">
+            </div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-success fw-bold" id="btnLoginAction">ENTRAR</button>
+                <button class="btn btn-outline-dark" id="btnGoogleAction"><i class="fab fa-google me-2"></i> Google</button>
+            </div>
+            <hr>
+            <div class="text-center">
+                <a href="#" class="text-decoration-none" onclick="toggleAuth('register')">Criar Conta</a> | 
+                <a href="#" class="text-decoration-none" onclick="toggleAuth('forgot')">Esqueci Senha</a>
+            </div>
+        </div>
+        
+        <!-- Register -->
+        <div id="registerForm" class="auth-card" style="display:none;">
+            <h4 class="text-center fw-bold">Nova Conta</h4>
+            <div class="mb-3"><label>Nome</label><input type="text" id="regName" class="form-control"></div>
+            <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
+            <div class="mb-3"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button>
+                <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
+            </div>
+        </div>
+
+        <!-- Token -->
+        <div id="tokenForm" class="auth-card" style="display:none;">
+            <h5 class="text-center fw-bold text-primary">Inserir Créditos</h5>
+            <p class="text-center small">Envie o código abaixo para o suporte.</p>
+            <div class="bg-light p-3 rounded text-center mb-3 border">
+                <h2 class="text-dark fw-bold m-0" id="displayAuthCode">----</h2>
+            </div>
+            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center" placeholder="Senha Recebida"></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-success fw-bold" id="btnTokenAction">VALIDAR</button>
+                <button class="btn btn-link text-danger" onclick="startUnauthorized()">Modo Demonstração</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="appContainer" style="display: none;">
+        <header class="header-app sticky-top">
+            <div class="container d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-tractor fa-2x me-3"></i>
+                    <div>
+                        <h5 class="m-0 fw-bold">SRA Milho Profissional</h5>
+                        <small class="text-white-50">IAC 100 (2022)</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-white text-success p-2 shadow-sm me-3">
+                        <i class="fas fa-coins"></i> Créditos: <span id="creditCounter" class="fw-bold">...</span>
+                    </span>
+                    
+                    <div class="dropdown me-2">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> <span id="userNameDisplay">Usuário</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="showTokenScreen()">Comprar Créditos</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- BOTÃO SAIR NO TOPO -->
+                    <button class="btn btn-sm btn-danger fw-bold" id="btnLogoutTop" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> SAIR
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container mt-4 pb-5">
+            
+            <!-- STATUS BAR -->
+            <div id="statusAlert" class="alert shadow-sm" style="display: none;">
+                <div class="d-flex align-items-center">
+                    <div class="fs-2 me-3" id="statusIcon"></div>
+                    <div>
+                        <h6 class="fw-bold m-0" id="statusTitle"></h6>
+                        <p class="m-0 small" id="statusMsg"></p>
+                    </div>
+                    <div class="ms-auto" id="returnBtnContainer" style="display:none;">
+                        <button class="btn btn-danger btn-sm fw-bold" onclick="resetToRealMode()">Cancelar Simulação</button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="agronomicForm">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-outline-primary fw-bold btn-sm" onclick="triggerExampleData()">
+                        <i class="fas fa-magic me-2"></i> Simulação Grátis
+                    </button>
+                </div>
+
+                <!-- CARDS DE ENTRADA -->
+                <div class="card card-custom">
+                    <div class="section-header"><i class="fas fa-user-tag"></i> 1. Identificação</div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-5"><label class="form-label">Proprietário</label><input type="text" class="form-control" id="ownerName"></div>
+                            <div class="col-md-5"><label class="form-label">Propriedade</label><input type="text" class="form-control" id="propName"></div>
+                            <div class="col-md-2"><label class="form-label">Protocolo</label><input type="text" class="form-control" id="protocolId"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="section-header"><i class="fas fa-seedling"></i> 2. Cultura</div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Safra</label>
+                                <select class="form-select" id="cropSeason">
+                                    <option value="verao">Verão (Safra Normal)</option>
+                                    <option value="safrinha">Safrinha (2ª Safra)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Meta (sc/ha)</label>
+                                <input type="number" class="form-control" id="targetYield">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cultura Anterior</label>
+                                <select class="form-select" id="prevCulture">
+                                    <option value="graminea">Gramínea</option>
+                                    <option value="milho">Milho</option>
+                                    <option value="leguminosa">Leguminosa</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Manejo</label>
+                                <select class="form-select" id="systemType">
+                                    <option value="spd_consolidado">Plantio Direto Consolidado</option>
+                                    <option value="conv">Convencional</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="section-header"><i class="fas fa-flask"></i> 3. Solo (0-20 cm)</div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label">Argila (%)</label><input type="number" class="form-control" id="soilClay"></div>
+                            <div class="col-md-3"><label class="form-label">P-resina</label><input type="number" class="form-control" id="soilP"></div>
+                            <div class="col-md-3"><label class="form-label">K (mmol)</label><input type="number" class="form-control" id="soilK" oninput="calculateSB()"></div>
+                            <div class="col-md-3"><label class="form-label">Ca (mmol)</label><input type="number" class="form-control" id="soilCa" oninput="calculateSB()"></div>
+                            <div class="col-md-3"><label class="form-label">Mg (mmol)</label><input type="number" class="form-control" id="soilMg" oninput="calculateSB()"></div>
+                            <div class="col-md-3"><label class="form-label">Na (mmol)</label><input type="number" class="form-control" id="soilNa" value="0" oninput="calculateSB()"></div>
+                            <div class="col-md-3"><label class="form-label bg-light">SB</label><input type="number" class="form-control bg-light" id="soilSB" readonly></div>
+                            <div class="col-md-3"><label class="form-label">CTC</label><input type="number" class="form-control" id="soilCTC"></div>
+                            <div class="col-md-3"><label class="form-label">V (%)</label><input type="number" class="form-control" id="soilV"></div>
+                            <div class="col-md-3"><label class="form-label">PRNT</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-5">
+                    <button type="button" id="btnCalculate" class="btn btn-success btn-lg shadow fw-bold">
+                        <i class="fas fa-check-circle me-2"></i> PROCESSAR RECOMENDAÇÃO
+                    </button>
+                </div>
+            </form>
+
+            <!-- RESULTADOS NA TELA -->
+            <div id="resultsSection" style="display: none;">
+                <div class="card card-custom border-2 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="m-0"><i class="fas fa-file-alt me-2"></i>Laudo Técnico</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="nav nav-pills mb-3" id="pills-tab">
+                            <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="pill" data-bs-target="#pills-laudo">Laudo Descritivo</button></li>
+                            <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#pills-tabela">Tabela Técnica</button></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- TEXTO LONGO -->
+                            <div class="tab-pane fade show active" id="pills-laudo">
+                                <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="18" readonly></textarea>
+                                <div class="row g-2">
+                                    <div class="col-md-4"><button class="btn btn-success w-100" onclick="shareWhatsapp()"><i class="fab fa-whatsapp"></i> Enviar</button></div>
+                                    <div class="col-md-4"><button class="btn btn-primary w-100" onclick="shareEmail()"><i class="fas fa-envelope"></i> E-mail</button></div>
+                                    <div class="col-md-4"><button class="btn btn-danger w-100" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Baixar PDF</button></div>
+                                </div>
+                            </div>
+                            <!-- TABELA -->
+                            <div class="tab-pane fade" id="pills-tabela">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover text-center table-tech">
+                                        <thead><tr><th>Parâmetro</th><th>Valor Calculado</th><th>Unidade</th></tr></thead>
+                                        <tbody id="techTableBody">
+                                            <!-- JS preencherá aqui -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF TEMPLATE (OCULTO - USADO PARA GERAR O PDF) -->
+    <div id="pdf-hidden-container">
+        <div class="pdf-header-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</div>
+        <div class="pdf-sub-header">Cultura: Milho (Zea mays) | Base Técnica: Boletim 100 IAC (2022)</div>
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc;"></div>
+
+        <div class="pdf-section">
+            <div class="pdf-section-title">1. IDENTIFICAÇÃO E DIAGNÓSTICO</div>
+            <div class="pdf-text">
+                <strong>Produtor:</strong> <span id="pdf_owner"></span><br>
+                <strong>Propriedade:</strong> <span id="pdf_prop"></span><br>
+                <strong>Safra:</strong> <span id="pdf_season"></span> | <strong>Meta:</strong> <span id="pdf_yield"></span> sc/ha<br>
+                <strong>Solo:</strong> Argila <span id="pdf_clay"></span>% | V% Atual: <span id="pdf_v"></span>%
+            </div>
+        </div>
+
+        <div class="pdf-section">
+            <div class="pdf-section-title">2. CORREÇÃO E NUTRIÇÃO</div>
+            <div class="pdf-text" id="pdf_content_body" style="white-space: pre-wrap;"></div>
+        </div>
+
+        <div class="pdf-footer">
+            Documento gerado eletronicamente pelo SRA (Sistema de Recomendação Agronômica).<br>
+            Consulte sempre um Engenheiro Agrônomo responsável.
+        </div>
+    </div>
+
+    <!-- SCRIPTS FIREBASE E LÓGICA -->
+    <script type="module">
+        // --- 1. CONFIGURAÇÃO DO FIREBASE (IMPORTANTE: SUBSTITUA PELAS SUAS CHAVES) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // =================================================================================
+        // ATENÇÃO: VOCÊ DEVE COLAR SUAS CHAVES DO FIREBASE ABAIXO
+        // Crie projeto em: console.firebase.google.com -> Web App -> Copiar Config
+        // =================================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // <--- COLE SUA API KEY AQUI
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
+        // =================================================================================
+
+        // INICIALIZAR FIREBASE
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Erro Firebase", e);
+            alert("ERRO DE CONFIGURAÇÃO: As chaves do Firebase não foram inseridas no código.");
+        }
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let currentUserData = null; 
+        let appState = { generatedCode: null, isDemo: false, isFreeExample: false };
+
+        // --- ELEMENTOS DOM ---
+        const els = {
+            authScreen: document.getElementById('authScreen'),
+            appContainer: document.getElementById('appContainer'),
+            loginForm: document.getElementById('loginForm'),
+            regForm: document.getElementById('registerForm'),
+            tokenForm: document.getElementById('tokenForm'),
+            emailIn: document.getElementById('loginEmail'),
+            passIn: document.getElementById('loginPass'),
+            creditBadges: document.getElementById('creditCounter'),
+            userNameDisplay: document.getElementById('userNameDisplay'),
+            btnCalc: document.getElementById('btnCalculate')
+        };
+
+        // --- 2. SISTEMA DE AUTENTICAÇÃO ---
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    currentUserData = userSnap.data();
+                } else {
+                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 3 };
+                    await setDoc(userRef, currentUserData);
+                }
+                showAppUI();
+            } else {
+                currentUserData = null;
+                showAuthUI('login');
+            }
+        });
+
+        window.toggleAuth = (screen) => {
+            els.loginForm.style.display = 'none';
+            els.regForm.style.display = 'none';
+            els.tokenForm.style.display = 'none';
+            if(screen === 'login') els.loginForm.style.display = 'block';
+            if(screen === 'register') els.regForm.style.display = 'block';
+            if(screen === 'forgot') alert("Função simulada: Envie e-mail para suporte.");
+        };
+
+        window.startUnauthorized = () => {
+            appState.isDemo = true;
+            showAppUI();
+            setStatus("MODO DEMONSTRAÇÃO", "Sem conexão. Dados apenas visuais.", "alert-danger", "fa-ban", false);
+            triggerExampleData();
+        };
+
+        window.handleLogout = () => {
+            if(confirm("Deseja realmente sair?")) {
+                signOut(auth).then(() => {
+                    location.reload();
+                });
+            }
+        };
+
+        // Event Listeners (Module Scope)
+        document.getElementById('btnLoginAction').addEventListener('click', () => {
+            const email = els.emailIn.value;
+            const pass = els.passIn.value;
+            signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Erro: " + err.message));
+        });
+
+        document.getElementById('btnRegAction').addEventListener('click', () => {
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+            const name = document.getElementById('regName').value;
+            createUserWithEmailAndPassword(auth, email, pass).then(async (cred) => {
+                await setDoc(doc(db, "users", cred.user.uid), { name: name, email: email, credits: 3 });
+            }).catch(err => alert("Erro ao criar: " + err.message));
+        });
+
+        document.getElementById('btnGoogleAction').addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch(err => console.error(err));
+        });
+
+        // --- UI MANAGEMENT ---
+        function showAppUI() {
+            els.authScreen.style.display = 'none';
+            els.appContainer.style.display = 'block';
+            updateHeader();
+        }
+
+        function showAuthUI(screen) {
+            els.authScreen.style.display = 'flex';
+            els.appContainer.style.display = 'none';
+            window.toggleAuth(screen);
+        }
+
+        function updateHeader() {
+            if (appState.isDemo) {
+                els.creditBadges.innerText = "DEMO";
+                els.userNameDisplay.innerText = "Visitante";
+            } else if (currentUserData) {
+                els.creditBadges.innerText = currentUserData.credits;
+                els.userNameDisplay.innerText = currentUserData.name;
+            }
+        }
+
+        // --- 3. GESTÃO DE CRÉDITOS (TOKEN) ---
+        window.showTokenScreen = () => {
+            els.appContainer.style.display = 'none';
+            els.authScreen.style.display = 'flex';
+            window.toggleAuth('token');
+            document.getElementById('tokenForm').style.display = 'block';
+            appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
+            document.getElementById('displayAuthCode').innerText = appState.generatedCode;
+            const hash = (appState.generatedCode + 13) * 9 + 1954;
+            console.log(`SENHA DEBUG PARA 10 CRÉDITOS: ${hash}10`);
+        };
+
+        document.getElementById('btnTokenAction').addEventListener('click', async () => {
+            const input = document.getElementById('inputToken').value.replace(/\D/g, '');
+            if(input.length < 6) return alert("Código inválido");
+
+            const hash = parseInt(input.substring(0, 5));
+            const qtd = parseInt(input.substring(5));
+            const expected = (appState.generatedCode + 13) * 9 + 1954;
+
+            if (hash === expected && qtd > 0) {
+                const user = auth.currentUser;
+                if (user) {
+                    await updateDoc(doc(db, "users", user.uid), { credits: increment(qtd) });
+                    const snap = await getDoc(doc(db, "users", user.uid));
+                    currentUserData = snap.data();
+                    alert("Créditos adicionados!");
+                    showAppUI();
+                }
+            } else {
+                alert("Senha incorreta.");
+            }
+        });
+
+        // --- 4. LÓGICA DO APP (Cálculo e Relatório) ---
+        
+        window.calculateSB = () => {
+            const vals = ['soilCa', 'soilMg', 'soilK', 'soilNa'].map(id => parseFloat(document.getElementById(id).value)||0);
+            document.getElementById('soilSB').value = vals.reduce((a,b)=>a+b,0).toFixed(2);
+        };
+
+        window.triggerExampleData = () => {
+            appState.isFreeExample = true;
+            setStatus("SIMULAÇÃO GRÁTIS", "Dados fictícios. Não consome créditos.", "alert-warning", "fa-flask", true);
+            const rnd = (min,max) => (Math.random()*(max-min)+min).toFixed(1);
+            document.getElementById('ownerName').value = "Produtor Exemplo";
+            document.getElementById('propName').value = "Sítio Modelo";
+            document.getElementById('targetYield').value = Math.floor(rnd(120, 180));
+            document.getElementById('soilClay').value = rnd(20, 60);
+            document.getElementById('soilP').value = rnd(5, 40);
+            document.getElementById('soilK').value = rnd(1, 5);
+            document.getElementById('soilCa').value = rnd(20, 50);
+            document.getElementById('soilMg').value = rnd(5, 15);
+            document.getElementById('soilCTC').value = rnd(60, 100);
+            document.getElementById('soilV').value = rnd(30, 60);
+            window.calculateSB();
+            const inputs = document.querySelectorAll('#agronomicForm input, #agronomicForm select');
+            inputs.forEach(el => { el.readOnly = true; el.classList.add('demo-locked'); });
+            els.btnCalc.innerHTML = "SIMULAR (GRÁTIS)";
+            els.btnCalc.classList.replace('btn-success', 'btn-warning');
+        };
+
+        window.resetToRealMode = () => {
+            appState.isFreeExample = false;
+            document.getElementById('statusAlert').style.display = 'none';
+            const inputs = document.querySelectorAll('#agronomicForm input, #agronomicForm select');
+            inputs.forEach(el => { 
+                el.readOnly = false; el.classList.remove('demo-locked'); el.value = ''; 
+                if(el.type === 'number' && el.id === 'limePRNT') el.value = 80;
+            });
+            els.btnCalc.innerHTML = '<i class="fas fa-check-circle me-2"></i> PROCESSAR RECOMENDAÇÃO';
+            els.btnCalc.classList.replace('btn-warning', 'btn-success');
+            document.getElementById('resultsSection').style.display = 'none';
+        };
+
+        document.getElementById('btnCalculate').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const needsCredit = !appState.isDemo && !appState.isFreeExample;
+            if (needsCredit) {
+                if (!auth.currentUser || !currentUserData) return alert("Faça login novamente.");
+                if (currentUserData.credits <= 0) return alert("Saldo insuficiente.");
+                try {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
+                    currentUserData.credits--;
+                    updateHeader();
+                } catch (err) {
+                    return alert("Erro de conexão ao debitar: " + err.message);
+                }
+            }
+
+            const get = id => parseFloat(document.getElementById(id).value)||0;
+            const data = {
+                owner: document.getElementById('ownerName').value,
+                prop: document.getElementById('propName').value,
+                season: document.getElementById('cropSeason').value,
+                yield: get('targetYield'),
+                clay: get('soilClay'), P: get('soilP'), K: get('soilK'),
+                Ca: get('soilCa'), Mg: get('soilMg'), V: get('soilV'),
+                CTC: get('soilCTC'), PRNT: get('limePRNT')||100
+            };
+
+            // Lógica IAC 100
+            let nc = data.V < 70 ? ((70 - data.V) * data.CTC) / (data.PRNT * 10) : 0;
+            nc = Math.max(0, nc);
+            let limeType = data.Mg < 5 ? "Dolomítico (Rico em Mg)" : "Calcítico";
+            let tex = data.clay <= 20 ? "Arenosa" : (data.clay <= 60 ? "Média" : "Argilosa");
+            let recN = data.season === 'safrinha' ? (data.yield * 1.0) : (data.yield * 1.2);
+            let recP = data.P < 15 ? 100 : (data.P < 40 ? 60 : 20);
+            let recK = data.K < 1.5 ? 100 : (data.K < 3.0 ? 60 : 20);
+            if(data.season === 'safrinha') recK *= 0.8;
+            let map = recP / 0.52;
+            let kcl = recK / 0.60;
+            let nMap = map * 0.11;
+            let urea = Math.max(0, recN - nMap) / 0.45;
+
+            const dateStr = new Date().toLocaleDateString('pt-BR');
+            
+            const laudoTexto = `
+LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA
+Cultura: Milho (Zea mays)
+Base Técnica: Boletim 100 IAC (2022)
+------------------------------------------------------------
+DADOS GERAIS
+Data da Emissão: ${dateStr}
+Produtor: ${data.owner}
+Propriedade: ${data.prop}
+Safra de Cultivo: ${data.season.toUpperCase()}
+Meta de Produtividade: ${data.yield} sacas/ha
+
+1. DIAGNÓSTICO DO SOLO
+A análise de solo (0-20 cm) indica uma textura ${tex.toUpperCase()} (${data.clay}% de argila).
+O índice de saturação por bases atual é de ${data.V}%, indicando a necessidade de correção para atingir o nível ideal de 70% exigido pela cultura do milho para alta produtividade.
+
+2. CORREÇÃO DA ACIDEZ (CALAGEM)
+Com base no método da Saturação por Bases, recomenda-se a aplicação de:
+>>> ${nc.toFixed(1)} toneladas por hectare de Calcário ${limeType}.
+Orientação: A aplicação deve ser realizada preferencialmente a lanço, com antecedência mínima de 60 dias do plantio, incorporando-se o produto para maximizar a reação no perfil do solo.
+
+3. PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K)
+Para atingir a meta estipulada, o requerimento nutricional calculado é:
+- Nitrogênio (N): ${recN.toFixed(0)} kg/ha
+- Fósforo (P2O5): ${recP} kg/ha
+- Potássio (K2O): ${recK.toFixed(0)} kg/ha
+
+SUGESTÃO DE MANEJO E FONTES:
+
+A) ADUBAÇÃO DE PLANTIO (No Sulco)
+Recomenda-se aplicar no momento da semeadura:
+- ${Math.round(map)} kg/ha de MAP (Monoamônio Fosfato)
+- ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
+Nota: Esta dose fornece o fósforo necessário para o arranque inicial e arranque radicular vigoroso.
+
+B) ADUBAÇÃO DE COBERTURA
+Deverá ser realizada preferencialmente entre os estádios V4 e V6 (4 a 6 folhas verdadeiras), com solo úmido:
+- ${Math.round(urea)} kg/ha de Ureia Agrícola
+- ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
+
+OBSERVAÇÕES TÉCNICAS
+O sucesso desta recomendação depende de boas práticas culturais, controle de pragas e doenças, e condições climáticas favoráveis.
+------------------------------------------------------------
+Sistema de Recomendação Agronômica (SRA)
+`;
+
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('finalReportText').value = laudoTexto.trim();
+            
+            const tbody = document.getElementById('techTableBody');
+            tbody.innerHTML = `
+                <tr><td>Nec. Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr>
+                <tr><td>N Total</td><td>${recN.toFixed(0)}</td><td>kg/ha</td></tr>
+                <tr><td>P2O5 Total</td><td>${recP}</td><td>kg/ha</td></tr>
+                <tr><td>K2O Total</td><td>${recK.toFixed(0)}</td><td>kg/ha</td></tr>
+                <tr><td>MAP Est.</td><td>${Math.round(map)}</td><td>kg/ha</td></tr>
+                <tr><td>Ureia Est.</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>
+            `;
+
+            document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
+            
+            // PREENCHER DADOS DO PDF OCULTO
+            document.getElementById('pdf_owner').innerText = data.owner;
+            document.getElementById('pdf_prop').innerText = data.prop;
+            document.getElementById('pdf_season').innerText = data.season.toUpperCase();
+            document.getElementById('pdf_yield').innerText = data.yield;
+            document.getElementById('pdf_clay').innerText = data.clay;
+            document.getElementById('pdf_v').innerText = data.V;
+            document.getElementById('pdf_content_body').innerText = laudoTexto.replace(/DADOS GERAIS[\s\S]*?Meta de Produtividade:.*?\n/g, ""); // Remove cabeçalho duplicado no corpo
+        });
+
+        // --- UTILS ---
+        function setStatus(title, msg, cls, icon, showReturn) {
+            const el = document.getElementById('statusAlert');
+            el.className = `alert shadow-sm ${cls}`;
+            el.style.display = 'block';
+            document.getElementById('statusTitle').innerText = title;
+            document.getElementById('statusMsg').innerText = msg;
+            document.getElementById('statusIcon').innerHTML = `<i class="fas ${icon}"></i>`;
+            document.getElementById('returnBtnContainer').style.display = showReturn ? 'block' : 'none';
+        }
+
+        // --- EXPORTAR ---
+        window.shareWhatsapp = () => {
+            const txt = document.getElementById('finalReportText').value;
+            window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`);
+        };
+        window.shareEmail = () => {
+            const txt = document.getElementById('finalReportText').value;
+            location.href = `mailto:?body=${encodeURIComponent(txt)}`;
+        };
+        
+        // CORREÇÃO PDF EM BRANCO: Exibe temporariamente, gera, e esconde
+        window.downloadPDF = () => {
+            const element = document.getElementById('pdf-hidden-container');
+            const owner = document.getElementById('ownerName').value || "Produtor";
+            
+            // 1. Torna visível para o html2pdf capturar
+            element.classList.add('pdf-visible-mode');
+
+            const opt = {
+                margin: 0,
+                filename: `Laudo_${owner}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // 2. Gera e depois esconde
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-visible-mode');
+            });
+        };
+
+    </script>
+</body>
+</html>
