@@ -61,7 +61,6 @@
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
         /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
-        /* Estes estilos serão embutidos no arquivo .doc baixado */
         #exportContent { display: none; }
         
         .doc-body { font-family: 'Arial', sans-serif; line-height: 1.5; color: #000; }
@@ -87,6 +86,7 @@
 
     <!-- TELA DE AUTENTICAÇÃO -->
     <div id="authScreen" class="auth-overlay">
+        
         <!-- Login -->
         <div id="loginForm" class="auth-card">
             <div class="text-center mb-4">
@@ -109,7 +109,7 @@
             <div class="text-center mt-4">
                 <a href="#" class="text-decoration-none me-3" onclick="toggleAuth('register')">Criar Conta</a>
                 <span class="text-muted">|</span>
-                <a href="#" class="text-decoration-none ms-3 text-muted" onclick="alert('Funcionalidade simulada. Contate o suporte.')">Esqueci a Senha</a>
+                <a href="#" class="text-decoration-none ms-3 text-muted" onclick="toggleAuth('forgot')">Esqueci a Senha</a>
             </div>
         </div>
         
@@ -122,6 +122,17 @@
             <div class="d-grid gap-2">
                 <button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button>
                 <button class="btn btn-link text-secondary" onclick="toggleAuth('login')">Voltar ao Login</button>
+            </div>
+        </div>
+
+        <!-- Recuperar Senha (NOVO) -->
+        <div id="forgotForm" class="auth-card" style="display:none;">
+            <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
+            <p class="text-center small text-muted">Digite seu e-mail para receber o link de redefinição.</p>
+            <div class="mb-4"><label>E-mail cadastrado</label><input type="email" id="forgotEmail" class="form-control"></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-warning fw-bold text-white" id="btnForgotAction">ENVIAR E-MAIL</button>
+                <button class="btn btn-link text-secondary" onclick="toggleAuth('login')">Voltar</button>
             </div>
         </div>
 
@@ -301,7 +312,9 @@
                                 <textarea id="finalReportText" class="form-control report-box shadow-sm mb-4" rows="20" readonly></textarea>
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> Enviar WhatsApp</button></div>
-                                    <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Laudo (Word/PDF)</button></div>
+                                    
+                                    <!-- BOTÃO DE DOCX (WORD) - SUBSTITUI O PDF INSTÁVEL -->
+                                    <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Laudo (Word/DOC)</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -376,21 +389,20 @@
     <script type="module">
         // --- FIREBASE IMPORT ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ==============================================================
         // ATENÇÃO: SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ABAIXO
         // ==============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
-  authDomain: "milho-iac.firebaseapp.com",
-  projectId: "milho-iac",
-  storageBucket: "milho-iac.firebasestorage.app",
-  messagingSenderId: "1072500431786",
-  appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
-  measurementId: "G-07R2DFGE8T"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // COLE AQUI SUA CHAVE API
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
 
         let app, auth, db;
         try {
@@ -411,6 +423,7 @@ const firebaseConfig = {
             loginForm: document.getElementById('loginForm'),
             regForm: document.getElementById('registerForm'),
             tokenForm: document.getElementById('tokenForm'),
+            forgotForm: document.getElementById('forgotForm'),
             creditBadges: document.getElementById('creditCounter'),
             userNameDisplay: document.getElementById('userNameDisplay'),
             btnCalc: document.getElementById('btnCalculate')
@@ -437,8 +450,10 @@ const firebaseConfig = {
             els.loginForm.style.display = 'none';
             els.regForm.style.display = 'none';
             els.tokenForm.style.display = 'none';
+            els.forgotForm.style.display = 'none';
             if(screen === 'login') els.loginForm.style.display = 'block';
             if(screen === 'register') els.regForm.style.display = 'block';
+            if(screen === 'forgot') els.forgotForm.style.display = 'block';
         };
 
         window.startUnauthorized = () => {
@@ -464,6 +479,14 @@ const firebaseConfig = {
         });
         document.getElementById('btnGoogleAction').addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
+        });
+        
+        // Listener Esqueci Senha
+        document.getElementById('btnForgotAction').addEventListener('click', () => {
+            const email = document.getElementById('forgotEmail').value;
+            sendPasswordResetEmail(auth, email)
+            .then(() => { alert("E-mail de recuperação enviado!"); toggleAuth('login'); })
+            .catch(error => alert("Erro: " + error.message));
         });
 
         // --- UI ---
@@ -796,12 +819,11 @@ Sistema de Recomendação Agronômica (SRA)
         // --- EXPORTAR ---
         window.shareWhatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
         
-        // --- GERADOR DE DOCX (WORD) ROBUSTO ---
+        // EXPORTAR WORD (.DOC) - FUNÇÃO INFALÍVEL
         window.downloadWord = () => {
-            // Pega o conteúdo oculto formatado
             const content = document.getElementById('exportContent').innerHTML;
             
-            // Cria estrutura HTML compatível com Word
+            // Cabeçalho para que o Word entenda a codificação e estilos
             const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title>" +
                             "<style>body{font-family:Arial,sans-serif;} .doc-header{border-bottom:2px solid green;margin-bottom:20px;} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left: 5px solid green;} .doc-table{width:100%;border-collapse:collapse;} .doc-table td{border:1px solid #999;padding:5px;}</style>" +
                             "</head><body>";
@@ -809,13 +831,9 @@ Sistema de Recomendação Agronômica (SRA)
             
             const html = preHtml + content + postHtml;
 
-            // Cria o Blob
-            const blob = new Blob(['\ufeff', html], {
-                type: 'application/msword'
-            });
-            
-            // Link de Download
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
+            
             const link = document.createElement('a');
             const owner = document.getElementById('ownerName').value || "Produtor";
             link.href = url;
