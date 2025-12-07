@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRA Milho Profissional - Híbrido</title>
+    <title>SRA Milho Profissional - Sistema Completo</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -60,10 +60,15 @@
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/IMPRESSÃO) --- */
         #exportContent { display: none; }
         
-        .doc-body { font-family: 'Arial', sans-serif; line-height: 1.5; color: #000; }
+        @media print {
+            body * { visibility: hidden; }
+            #exportContent, #exportContent * { visibility: visible; display: block !important; }
+            #exportContent { position: absolute; left: 0; top: 0; width: 100%; padding: 40px; }
+        }
+        
         .doc-header { border-bottom: 3px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
         .doc-title { font-size: 24px; font-weight: bold; color: #2e7d32; margin: 0; }
         .doc-subtitle { font-size: 12px; color: #555; margin-top: 5px; }
@@ -72,10 +77,10 @@
             font-weight: bold; font-size: 14px; margin-top: 20px; margin-bottom: 10px;
             border-left: 5px solid #1b5e20; 
         }
-        .doc-text { font-size: 12px; margin-bottom: 10px; text-align: justify; }
+        .doc-text { font-size: 12px; margin-bottom: 10px; text-align: justify; line-height: 1.5; }
         .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 5px; font-size: 12px; }
-        .doc-table td { border: 1px solid #ccc; padding: 5px; font-size: 12px; text-align: center; }
+        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; }
+        .doc-table td { border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; }
         .doc-footer { 
             margin-top: 50px; padding-top: 10px; border-top: 1px solid #ccc; 
             text-align: center; font-size: 10px; color: #999; 
@@ -86,13 +91,12 @@
 
     <!-- TELA DE AUTENTICAÇÃO -->
     <div id="authScreen" class="auth-overlay">
-        
         <!-- Login -->
         <div id="loginForm" class="auth-card">
             <div class="text-center mb-4">
                 <i class="fas fa-database text-success fa-4x"></i>
                 <h3 class="fw-bold mt-3">SRA Milho</h3>
-                <p class="text-muted">Sistema Híbrido Profissional</p>
+                <p class="text-muted">Sistema Profissional Híbrido</p>
             </div>
             <div class="mb-3">
                 <label class="form-label">E-mail</label>
@@ -125,13 +129,12 @@
             </div>
         </div>
 
-        <!-- Recuperar Senha (NOVO) -->
+        <!-- Recuperar Senha -->
         <div id="forgotForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
-            <p class="text-center small text-muted">Digite seu e-mail para receber o link de redefinição.</p>
             <div class="mb-4"><label>E-mail cadastrado</label><input type="email" id="forgotEmail" class="form-control"></div>
             <div class="d-grid gap-2">
-                <button class="btn btn-warning fw-bold text-white" id="btnForgotAction">ENVIAR E-MAIL</button>
+                <button class="btn btn-warning fw-bold text-white" id="btnForgotAction">ENVIAR EMAIL</button>
                 <button class="btn btn-link text-secondary" onclick="toggleAuth('login')">Voltar</button>
             </div>
         </div>
@@ -311,10 +314,10 @@
                             <div class="tab-pane fade show active" id="pills-laudo">
                                 <textarea id="finalReportText" class="form-control report-box shadow-sm mb-4" rows="20" readonly></textarea>
                                 <div class="row g-2">
-                                    <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> Enviar WhatsApp</button></div>
-                                    
-                                    <!-- BOTÃO DE DOCX (WORD) - SUBSTITUI O PDF INSTÁVEL -->
-                                    <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Laudo (Word/DOC)</button></div>
+                                    <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
+                                    <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.doc)</button></div>
+                                    <!-- Botão de Impressão Nativa (Gera PDF) -->
+                                    <div class="col-12 mt-2"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="printReport()"><i class="fas fa-print me-2"></i> Imprimir / Salvar PDF (Nativo)</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -355,7 +358,7 @@
         </div>
     </div>
 
-    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC -->
+    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PRINT -->
     <div id="exportContent">
         <div class="doc-header">
             <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -384,29 +387,25 @@
     </div>
 
     <!-- LÓGICA DO SISTEMA -->
-<!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script type="module">
-    // IMPORTAR AS LIBS DO FIREBASE
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, ... } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, ... } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        // --- FIREBASE IMPORT ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // IMPORTAR A CONFIGURAÇÃO DO ARQUIVO EXTERNO
-    import { firebaseConfig } from './config.js'; 
-
-    let app, auth, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        // ... resto do código continua igual ...
         // ==============================================================
         // ATENÇÃO: SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ABAIXO
         // ==============================================================
-
-//const firebaseConfig = {
-//  apiKey: 
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // COLE AQUI SUA CHAVE API
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
 
         let app, auth, db;
         try {
@@ -484,13 +483,10 @@
         document.getElementById('btnGoogleAction').addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
         });
-        
-        // Listener Esqueci Senha
         document.getElementById('btnForgotAction').addEventListener('click', () => {
-            const email = document.getElementById('forgotEmail').value;
-            sendPasswordResetEmail(auth, email)
-            .then(() => { alert("E-mail de recuperação enviado!"); toggleAuth('login'); })
-            .catch(error => alert("Erro: " + error.message));
+            sendPasswordResetEmail(auth, document.getElementById('forgotEmail').value)
+            .then(() => alert("E-mail de redefinição enviado! Verifique sua caixa de entrada."))
+            .catch(err => alert("Erro: " + err.message));
         });
 
         // --- UI ---
@@ -543,7 +539,7 @@
             }
         });
 
-        // --- LÓGICA AGRONÔMICA ---
+        // --- LÓGICA AGRONÔMICA IAC 100 COMPLETA (RESTAURADA) ---
         
         window.calculateSB = () => {
             const vals = ['soilCa', 'soilMg', 'soilK', 'soilNa'].map(id => parseFloat(document.getElementById(id).value)||0);
@@ -568,7 +564,6 @@
             
             window.calculateSB();
             
-            // Travar campos
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el => { 
                 el.readOnly = true; el.classList.add('demo-locked');
                 if(el.tagName === 'SELECT') el.disabled = true;
@@ -594,7 +589,6 @@
             e.preventDefault();
             const isReal = !appState.isDemo && !appState.isFreeExample;
             
-            // COBRANÇA
             if (isReal) {
                 if (!auth.currentUser || !currentUserData) return alert("Faça login novamente.");
                 if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
@@ -605,7 +599,6 @@
                 } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
             }
 
-            // DADOS
             const get = id => parseFloat(document.getElementById(id).value)||0;
             const data = {
                 owner: document.getElementById('ownerName').value,
@@ -618,46 +611,50 @@
                 Mg: get('soilMg')
             };
 
-            // --- LÓGICA IAC 100 (COMPLETA) ---
-            let nc = 0;
-            if(data.V < 70) nc = ((70 - data.V) * data.CTC) / (data.PRNT * 10);
-            nc = Math.max(0, nc);
-            let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
+            // --- CÁLCULOS IAC 100 COMPLETOS ---
             
+            // 1. Textura
             let texClass = "";
             if (data.clay <= 20) texClass = "Arenosa";
             else if (data.clay <= 60) texClass = "Média";
             else texClass = "Argilosa";
 
-            // Nitrogênio
-            let recN = 0;
-            const highYield = data.yield > 100;
-            if(data.prevCult === "milho") recN = highYield ? 80 : 60;
-            else if(data.prevCult === "graminea") recN = highYield ? 100 : 80;
-            else recN = highYield ? 60 : 40;
-            if (data.yield > 120) recN += (data.yield - 100) * 1.0; 
+            // 2. Calagem
+            let nc = 0;
+            if(data.V < 70) nc = ((70 - data.V) * data.CTC) / (data.PRNT * 10);
+            nc = Math.max(0, nc);
+            let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
 
-            // Fósforo
+            // 3. Fósforo (IAC Tabela 1 Completa)
             let recP = 0;
             if(texClass === "Arenosa") {
                 if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
             } else if(texClass === "Média") {
                 if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
-            } else { 
+            } else { // Argilosa
                 if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
             }
 
-            // Potássio
+            // 4. Potássio (IAC Tabela 1 Completa)
             let recK = 0;
             if(texClass === "Arenosa") {
                 if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
             } else if(texClass === "Média") {
                 if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
-            } else { 
+            } else { // Argilosa
                 if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
             }
 
-            // Ajuste Safrinha
+            // 5. Nitrogênio (IAC Tabela 2 Completa)
+            let recN = 0;
+            const highYield = data.yield > 100; // > 100 sc/ha (6t)
+            if(data.prevCult === "milho") recN = highYield ? 80 : 60;
+            else if(data.prevCult === "graminea") recN = highYield ? 100 : 80;
+            else recN = highYield ? 60 : 40;
+
+            // Ajuste Safrinha e Produtividade extra
+            if (data.yield > 120) recN += (data.yield - 100) * 1.0; 
+            
             let warningSafra = "";
             if(data.season === 'safrinha') {
                 recN *= 0.8; recK *= 0.8;
@@ -673,7 +670,7 @@
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
             
-            // LAUDO TEXTUAL
+            // LAUDO TEXTUAL DETALHADO
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
@@ -708,7 +705,7 @@ SUGESTÃO DE MANEJO E FONTES:
 A) ADUBAÇÃO DE SEMEADURA (NO SULCO)
    > ${Math.round(map)} kg/ha de MAP (Monoamônio Fosfato)
    > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
-   Nota: Em solos arenosos ou se a dose de KCl for elevada (>60kg K2O), recomenda-se antecipar o potássio a lanço.
+   Nota: Em solos arenosos ou se a dose de KCl for elevada (>60kg K2O), recomenda-se antecipar o potássio a lanço para evitar salinidade na semente.
 
 B) ADUBAÇÃO DE COBERTURA
    > ${Math.round(urea)} kg/ha de Ureia Agrícola
@@ -826,26 +823,25 @@ Sistema de Recomendação Agronômica (SRA)
         // EXPORTAR WORD (.DOC) - FUNÇÃO INFALÍVEL
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
-            
-            // Cabeçalho para que o Word entenda a codificação e estilos
-            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title>" +
-                            "<style>body{font-family:Arial,sans-serif;} .doc-header{border-bottom:2px solid green;margin-bottom:20px;} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left: 5px solid green;} .doc-table{width:100%;border-collapse:collapse;} .doc-table td{border:1px solid #999;padding:5px;}</style>" +
-                            "</head><body>";
+            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title><style>body{font-family:Arial} .doc-header{border-bottom:2px solid green;margin-bottom:20px} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left:5px solid green} .doc-table{width:100%;border-collapse:collapse} .doc-table td, .doc-table th{border:1px solid #999;padding:5px}</style></head><body>";
             const postHtml = "</body></html>";
-            
-            const html = preHtml + content + postHtml;
-
-            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            
+            const blob = new Blob(['\ufeff', preHtml + content + postHtml], { type: 'application/msword' });
             const link = document.createElement('a');
-            const owner = document.getElementById('ownerName').value || "Produtor";
-            link.href = url;
-            link.download = `Laudo_${owner}.doc`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laudo_${document.getElementById('ownerName').value}.doc`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        };
+
+        // EXPORTAR PDF (JANELA DE IMPRESSÃO)
+        window.printPDF = () => {
+            const content = document.getElementById('exportContent').innerHTML;
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Laudo Agronômico</title><style>body{font-family:Arial,sans-serif;padding:40px} .doc-header{border-bottom:3px solid #1b5e20;margin-bottom:20px} .doc-section-title{background:#f0f0f0;border-left:5px solid #1b5e20;padding:10px;font-weight:bold;margin-top:20px} .doc-text{text-align:justify;line-height:1.5}</style></head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); }, 500);
         };
 
     </script>
