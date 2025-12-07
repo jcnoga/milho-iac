@@ -60,27 +60,22 @@
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/IMPRESSÃO) --- */
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/PDF) --- */
+        /* Oculto na tela principal, usado apenas pelo gerador */
         #exportContent { display: none; }
         
-        @media print {
-            body * { visibility: hidden; }
-            #exportContent, #exportContent * { visibility: visible; display: block !important; }
-            #exportContent { position: absolute; left: 0; top: 0; width: 100%; padding: 40px; }
-        }
-        
-        .doc-header { border-bottom: 3px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
-        .doc-title { font-size: 24px; font-weight: bold; color: #2e7d32; margin: 0; }
+        .doc-header { border-bottom: 3px solid #1b5e20; margin-bottom: 20px; padding-bottom: 10px; }
+        .doc-title { font-size: 24px; font-weight: bold; color: #1b5e20; margin: 0; text-transform: uppercase; }
         .doc-subtitle { font-size: 12px; color: #555; margin-top: 5px; }
         .doc-section-title { 
             background-color: #e8f5e9; color: #1b5e20; padding: 8px; 
             font-weight: bold; font-size: 14px; margin-top: 20px; margin-bottom: 10px;
             border-left: 5px solid #1b5e20; 
         }
-        .doc-text { font-size: 12px; margin-bottom: 10px; text-align: justify; line-height: 1.5; }
+        .doc-text { font-size: 12px; margin-bottom: 10px; text-align: justify; line-height: 1.5; color: #000; }
         .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; }
-        .doc-table td { border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; }
+        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; color: #000; }
+        .doc-table td { border: 1px solid #ccc; padding: 8px; font-size: 12px; text-align: center; color: #000; }
         .doc-footer { 
             margin-top: 50px; padding-top: 10px; border-top: 1px solid #ccc; 
             text-align: center; font-size: 10px; color: #999; 
@@ -134,7 +129,7 @@
             <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
             <div class="mb-4"><label>E-mail cadastrado</label><input type="email" id="forgotEmail" class="form-control"></div>
             <div class="d-grid gap-2">
-                <button class="btn btn-warning fw-bold text-white" id="btnForgotAction">ENVIAR EMAIL</button>
+                <button class="btn btn-warning fw-bold text-white" id="btnForgotAction">ENVIAR LINK</button>
                 <button class="btn btn-link text-secondary" onclick="toggleAuth('login')">Voltar</button>
             </div>
         </div>
@@ -316,8 +311,8 @@
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.doc)</button></div>
-                                    <!-- Botão de Impressão Nativa (Gera PDF) -->
-                                    <div class="col-12 mt-2"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="printReport()"><i class="fas fa-print me-2"></i> Imprimir / Salvar PDF (Nativo)</button></div>
+                                    <!-- NOVO BOTÃO DE PDF VIA IMPRESSÃO (NATIVO) -->
+                                    <div class="col-12 mt-2"><button class="btn btn-danger w-100 fw-bold py-2" onclick="printPDF()"><i class="fas fa-file-pdf me-2"></i> Imprimir / Salvar PDF (Nativo)</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -358,7 +353,7 @@
         </div>
     </div>
 
-    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PRINT -->
+    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PDF -->
     <div id="exportContent">
         <div class="doc-header">
             <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -398,15 +393,17 @@
         // ==============================================================
         // ATENÇÃO: SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ABAIXO
         // ==============================================================
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
   authDomain: "milho-iac.firebaseapp.com",
   projectId: "milho-iac",
- storageBucket: "milho-iac.firebasestorage.app",
+  storageBucket: "milho-iac.firebasestorage.app",
   messagingSenderId: "1072500431786",
   appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
   measurementId: "G-07R2DFGE8T"
 };
+
 
         let app, auth, db;
         try {
@@ -540,7 +537,7 @@ const firebaseConfig = {
             }
         });
 
-        // --- LÓGICA AGRONÔMICA IAC 100 COMPLETA (RESTAURADA) ---
+        // --- LÓGICA AGRONÔMICA ---
         
         window.calculateSB = () => {
             const vals = ['soilCa', 'soilMg', 'soilK', 'soilNa'].map(id => parseFloat(document.getElementById(id).value)||0);
@@ -612,50 +609,46 @@ const firebaseConfig = {
                 Mg: get('soilMg')
             };
 
-            // --- CÁLCULOS IAC 100 COMPLETOS ---
+            // --- LÓGICA IAC 100 COMPLETA ---
+            let nc = 0;
+            if(data.V < 70) nc = ((70 - data.V) * data.CTC) / (data.PRNT * 10);
+            nc = Math.max(0, nc);
+            let limeType = data.Mg < 5 ? "Dolomítico" : "Calcítico";
             
-            // 1. Textura
             let texClass = "";
             if (data.clay <= 20) texClass = "Arenosa";
             else if (data.clay <= 60) texClass = "Média";
             else texClass = "Argilosa";
 
-            // 2. Calagem
-            let nc = 0;
-            if(data.V < 70) nc = ((70 - data.V) * data.CTC) / (data.PRNT * 10);
-            nc = Math.max(0, nc);
-            let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
+            // Nitrogênio
+            let recN = 0;
+            const highYield = data.yield > 100;
+            if(data.prevCult === "milho") recN = highYield ? 80 : 60;
+            else if(data.prevCult === "graminea") recN = highYield ? 100 : 80;
+            else recN = highYield ? 60 : 40;
+            if (data.yield > 120) recN += (data.yield - 100) * 1.0; 
 
-            // 3. Fósforo (IAC Tabela 1 Completa)
+            // Fósforo
             let recP = 0;
             if(texClass === "Arenosa") {
                 if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
             } else if(texClass === "Média") {
                 if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
-            } else { // Argilosa
+            } else { 
                 if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
             }
 
-            // 4. Potássio (IAC Tabela 1 Completa)
+            // Potássio
             let recK = 0;
             if(texClass === "Arenosa") {
                 if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
             } else if(texClass === "Média") {
                 if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
-            } else { // Argilosa
+            } else { 
                 if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
             }
 
-            // 5. Nitrogênio (IAC Tabela 2 Completa)
-            let recN = 0;
-            const highYield = data.yield > 100; // > 100 sc/ha (6t)
-            if(data.prevCult === "milho") recN = highYield ? 80 : 60;
-            else if(data.prevCult === "graminea") recN = highYield ? 100 : 80;
-            else recN = highYield ? 60 : 40;
-
-            // Ajuste Safrinha e Produtividade extra
-            if (data.yield > 120) recN += (data.yield - 100) * 1.0; 
-            
+            // Ajuste Safrinha
             let warningSafra = "";
             if(data.season === 'safrinha') {
                 recN *= 0.8; recK *= 0.8;
@@ -671,7 +664,7 @@ const firebaseConfig = {
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
             
-            // LAUDO TEXTUAL DETALHADO
+            // LAUDO TEXTUAL
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
@@ -744,7 +737,7 @@ Sistema de Recomendação Agronômica (SRA)
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // Preencher dados do Export Oculto (DOC)
+            // Preencher dados do Export Oculto
             document.getElementById('doc_owner').innerText = data.owner;
             document.getElementById('doc_prop').innerText = data.prop;
             document.getElementById('doc_season').innerText = data.season.toUpperCase();
@@ -752,8 +745,12 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('doc_texture').innerText = texClass;
             document.getElementById('doc_clay').innerText = data.clay;
             document.getElementById('doc_v').innerText = data.V;
-            document.getElementById('doc_body_content').innerText = laudo.substring(laudo.indexOf("2. CORREÇÃO"));
-            // Copiar tabela para o doc
+            
+            // Corpo do Documento
+            const bodyContent = laudo.substring(laudo.indexOf("2. CORREÇÃO"));
+            document.getElementById('doc_body_content').innerText = bodyContent;
+            
+            // Tabela para o Documento
             document.getElementById('doc_table_container').innerHTML = `
                 <table class="doc-table">
                     <thead><tr><th>Parâmetro</th><th>Valor Calculado</th><th>Unidade</th></tr></thead>
@@ -821,33 +818,34 @@ Sistema de Recomendação Agronômica (SRA)
         // --- EXPORTAR ---
         window.shareWhatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
         
-        // EXPORTAR WORD (.DOC) - FUNÇÃO INFALÍVEL
+        // --- GERADOR DE DOCX (WORD) ROBUSTO ---
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
-            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title><style>body{font-family:Arial} .doc-header{border-bottom:2px solid green;margin-bottom:20px} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left:5px solid green} .doc-table{width:100%;border-collapse:collapse} .doc-table td, .doc-table th{border:1px solid #999;padding:5px}</style></head><body>";
+            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title><style>body{font-family:Arial,sans-serif;} .doc-header{border-bottom:2px solid green;margin-bottom:20px;} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left: 5px solid green;} .doc-table{width:100%;border-collapse:collapse;} .doc-table td, .doc-table th{border:1px solid #999;padding:5px;}</style></head><body>";
             const postHtml = "</body></html>";
+            
             const blob = new Blob(['\ufeff', preHtml + content + postHtml], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            link.href = url;
             link.download = `Laudo_${document.getElementById('ownerName').value}.doc`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         };
 
-        // EXPORTAR PDF (JANELA DE IMPRESSÃO)
-
+        // --- EXPORTAR PDF (IMPRESSÃO NATIVA - INFALÍVEL) ---
         window.printPDF = () => {
-           const content = document.getElementById('exportContent').innerHTML;
-           const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Laudo Agronômico</title><style>body{font-family:Arial,sans-serif;padding:40px} .doc-header{border-bottom:3px solid #1b5e20;margin-bottom:20px} .doc-section-title{background:#f0f0f0;border-left:5px solid #1b5e20;padding:10px;font-weight:bold;margin-top:20px} .doc-text{text-align:justify;line-height:1.5}</style></head><body>');
+            const content = document.getElementById('exportContent').innerHTML;
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Laudo Agronômico</title><style>body{font-family:Arial,sans-serif;padding:40px} .doc-header{border-bottom:3px solid #1b5e20;margin-bottom:20px} .doc-section-title{background:#f0f0f0;border-left:5px solid #1b5e20;padding:10px;font-weight:bold;margin-top:20px} .doc-table{width:100%;border-collapse:collapse;margin-top:10px} .doc-table td, .doc-table th{border:1px solid #999;padding:8px} .doc-text{text-align:justify;line-height:1.5;white-space:pre-wrap}</style></head><body>');
             printWindow.document.write(content);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.focus();
             setTimeout(() => { printWindow.print(); }, 500);
         };
-	
-	
-
 
     </script>
 </body>
