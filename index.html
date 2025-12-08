@@ -11,9 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- BIBLIOTECAS DE EXPORTAÇÃO -->
-    <!-- HTML2PDF para gerar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- HTML-DOCX para gerar Word real -->
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     
     <style>
@@ -24,98 +22,50 @@
             --accent-color: #43a047;
             --soil-brown: #795548;
         }
-        body { 
-            background-color: #f0f2f5; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            color: #333; 
-        }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
         
         /* Layout Principal */
         .header-app {
             background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
-            color: white; 
-            padding: 15px 0; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: white; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Estilo do Formulário (Baseado no Anexo) */
+        /* Estilo do Formulário */
         .form-section-title {
-            font-size: 1.1rem; 
-            font-weight: 700; 
-            color: #1b5e20;
-            margin-bottom: 15px; 
-            border-bottom: 2px solid #e0e0e0; 
-            padding-bottom: 5px;
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
+            font-size: 1.1rem; font-weight: 700; color: #1b5e20;
+            margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
         .card-custom {
-            border: 1px solid #e0e0e0; 
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            margin-bottom: 20px;
-            background: white; 
-            padding: 25px;
+            border: 1px solid #e0e0e0; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
+            background: white; padding: 25px;
         }
         
-        /* Inputs Compactos */
-        .form-label { 
-            font-weight: 600; 
-            font-size: 0.85rem; 
-            color: #444; 
-            margin-bottom: 3px; 
-        }
+        /* Inputs */
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #444; margin-bottom: 3px; }
         .form-control, .form-select { 
-            border: 1px solid #ccc; 
-            padding: 8px 10px; 
-            font-size: 0.95rem; 
-            border-radius: 4px; 
-            background-color: #fff;
+            border: 1px solid #ccc; padding: 8px 10px; font-size: 0.95rem; border-radius: 4px; background-color: #fff;
         }
         .form-control:focus, .form-select:focus { 
-            border-color: #2e7d32; 
-            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2); 
+            border-color: #2e7d32; box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2); 
         }
-        .bg-readonly { 
-            background-color: #f2f2f2; 
-            font-weight: bold; 
-            color: #1b5e20; 
-        }
+        
+        /* Estilos de Travamento (Demo) */
+        .bg-readonly { background-color: #f2f2f2; font-weight: bold; color: #1b5e20; }
         .demo-locked { 
             pointer-events: none; 
             background-color: #e9ecef !important; 
             color: #6c757d; 
+            border-color: #ced4da;
         }
 
         /* Botões */
-        .btn-fill-purple { 
-            background-color: #6c5ce7; 
-            color: white; 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            border: none; 
-        }
-        .btn-fill-purple:hover { background-color: #5b4cc4; }
-        
-        .btn-save-green { 
-            background-color: #2e7d32; 
-            color: white; 
-            font-weight: bold; 
-            border-radius: 4px; 
-            padding: 12px 30px; 
-            border: none; 
-            font-size: 1rem; 
-        }
+        .btn-fill-purple { background-color: #6c5ce7; color: white; font-size: 0.9rem; font-weight: bold; border: none; }
+        .btn-fill-purple:hover { background-color: #5b4cc4; color: white; }
+        .btn-save-green { background-color: #2e7d32; color: white; font-weight: bold; border-radius: 4px; padding: 12px 30px; border: none; font-size: 1rem; }
         .btn-save-green:hover { background-color: #1b5e20; }
-        
-        .btn-clean { 
-            background-color: #fff; 
-            color: #666; 
-            border: 1px solid #ccc; 
-            font-weight: bold; 
-            border-radius: 4px; 
-            padding: 12px 30px; 
-        }
+        .btn-clean { background-color: #fff; color: #666; border: 1px solid #ccc; font-weight: bold; border-radius: 4px; padding: 12px 30px; }
 
         /* Auth & Modais */
         .auth-overlay {
@@ -136,12 +86,10 @@
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/PDF) --- */
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO --- */
         #exportContent { display: none; }
-        
         .doc-header { border-bottom: 3px solid #1b5e20; margin-bottom: 20px; padding-bottom: 10px; }
         .doc-title { font-size: 22px; font-weight: bold; color: #1b5e20; margin: 0; }
-        .doc-subtitle { font-size: 11px; color: #555; }
         .doc-section-title { 
             background-color: #e8f5e9; color: #1b5e20; padding: 5px; 
             font-weight: bold; font-size: 12px; margin-top: 15px; border-left: 5px solid #1b5e20; 
@@ -151,18 +99,6 @@
         .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 5px; }
         .doc-table td { border: 1px solid #ccc; padding: 5px; text-align: center; }
         .doc-footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 5px; text-align: center; font-size: 9px; color: #777; }
-        
-        /* Classe para PDF Visível Temporário */
-        .pdf-visible-clone {
-            display: block !important;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 99999;
-            background: white;
-            width: 210mm;
-            padding: 15mm;
-        }
     </style>
 </head>
 <body>
@@ -194,10 +130,7 @@
             <div class="mb-3"><label>Nome Completo</label><input type="text" id="regName" class="form-control"></div>
             <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
             <div class="mb-4"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button>
-                <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
-            </div>
+            <div class="d-grid gap-2"><button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
         </div>
 
         <!-- Recuperar Senha -->
@@ -245,14 +178,16 @@
                 <div class="d-flex align-items-center">
                     <div class="fs-2 me-3" id="statusIcon"></div>
                     <div><h6 class="fw-bold m-0" id="statusTitle"></h6><p class="m-0 small" id="statusMsg"></p></div>
-                    <div class="ms-auto" id="returnBtnContainer" style="display:none;"><button class="btn btn-danger btn-sm fw-bold" onclick="resetToRealMode()">Cancelar</button></div>
+                    <div class="ms-auto" id="returnBtnContainer" style="display:none;"><button class="btn btn-danger btn-sm fw-bold" onclick="resetToRealMode()">Cancelar / Limpar</button></div>
                 </div>
             </div>
 
-            <!-- Formulário Completo (Estilo Anexo) -->
+            <!-- Formulário Completo -->
             <div class="card-custom">
                 <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="btn btn-fill-purple btn-sm" onclick="triggerExampleData()"><i class="fas fa-magic me-1"></i> Preencher Teste</button>
+                    <button type="button" class="btn btn-fill-purple btn-sm" onclick="triggerExampleData()">
+                        <i class="fas fa-magic me-1"></i> Preencher Teste (Grátis)
+                    </button>
                 </div>
 
                 <form id="agronomicForm">
@@ -307,7 +242,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. Física e Micronutrientes -->
+                    <!-- 4. Física -->
                     <div class="mb-4">
                         <h5 class="form-section-title">4. Física e Micronutrientes</h5>
                         <div class="row g-2">
@@ -315,7 +250,6 @@
                             <div class="col-md-3"><label class="form-label">Areia (%)</label><input type="number" class="form-control" id="soilSand" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">Zn (mg/dm³)</label><input type="number" class="form-control" id="soilZn" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">B (mg/dm³)</label><input type="number" class="form-control" id="soilB" step="0.1"></div>
-                            
                             <div class="col-md-3"><label class="form-label">Mn (mg/dm³)</label><input type="number" class="form-control" id="soilMn" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">Cu (mg/dm³)</label><input type="number" class="form-control" id="soilCu" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">Fe (mg/dm³)</label><input type="number" class="form-control" id="soilFe" step="0.1"></div>
@@ -329,10 +263,10 @@
                         <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="checkSaveLocal" checked><label class="form-check-label">Salvar Local (Offline)</label></div>
                     </div>
 
-                    <!-- Botões de Ação -->
-                    <div class="d-flex gap-2">
-                        <button type="button" id="btnCalculate" class="btn-save-green" onclick="generateRecommendation()">Salvar Amostra e Gerar Laudo</button>
-                        <button type="button" class="btn-clean" onclick="resetToRealMode()">Limpar Tela</button>
+                    <div class="d-grid mb-5">
+                        <button type="button" id="btnCalculate" class="btn-save-green btn-lg shadow fw-bold" onclick="generateRecommendation()">
+                            <i class="fas fa-check-circle me-2"></i> GERAR RECOMENDAÇÃO
+                        </button>
                     </div>
                 </form>
             </div>
@@ -343,10 +277,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold text-success m-0">Laudo Técnico Gerado</h5>
                         <div class="d-flex gap-2">
-                             <!-- BOTÃO PDF CORRIGIDO -->
                             <button class="btn btn-danger btn-sm fw-bold" onclick="downloadPDF()"><i class="fas fa-file-pdf me-1"></i> Baixar PDF</button>
-                            <!-- BOTÃO DOCX -->
-                            <button class="btn btn-primary btn-sm fw-bold" onclick="downloadWord()"><i class="fas fa-file-word me-1"></i> Baixar DOCX</button>
+                            <button class="btn btn-primary btn-sm fw-bold" onclick="downloadWord()"><i class="fas fa-file-word me-1"></i> Baixar Word</button>
                         </div>
                     </div>
                     <ul class="nav nav-pills mb-3" id="pills-tab">
@@ -358,7 +290,7 @@
                             <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="20" readonly></textarea>
                             <div class="d-grid gap-2 d-md-block">
                                 <button class="btn btn-success fw-bold" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button>
-                                <button class="btn btn-outline-secondary" onclick="shareEmail()"><i class="fas fa-envelope me-2"></i> E-mail</button>
+                                <button class="btn btn-outline-secondary fw-bold" onclick="shareEmail()"><i class="fas fa-envelope me-2"></i> E-mail</button>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pills-tabela">
@@ -371,9 +303,9 @@
     </div>
 
     <!-- Modais -->
-    <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Histórico Local</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-outline-danger btn-sm" onclick="clearLocalHistory()">Limpar</button></div></div></div></div>
+    <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Histórico Local</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-outline-danger btn-sm" onclick="clearLocalHistory()">Limpar Tudo</button></div></div></div></div>
 
-    <!-- TEMPLATE EXPORTAÇÃO DOC/PDF -->
+    <!-- TEMPLATE EXPORTAÇÃO DOC/PDF (Oculto) -->
     <div id="exportContent">
         <div class="doc-header"><h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1><p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p></div>
         <div class="doc-section-title">1. IDENTIFICAÇÃO E DIAGNÓSTICO</div>
@@ -465,10 +397,9 @@
         window.calculateComplex = () => {
             const get = id => parseFloat(document.getElementById(id).value)||0;
             const K = get('soilK'); const Ca = get('soilCa'); const Mg = get('soilMg'); 
-            const Na = get('soilNa'); 
             const HAl = get('soilHAl'); // Acidez Potencial
 
-            const SB = Ca + Mg + K + Na;
+            const SB = Ca + Mg + K;
             const CTC = SB + HAl;
             const V = CTC > 0 ? (SB / CTC) * 100 : 0;
 
@@ -476,30 +407,39 @@
             document.getElementById('soilV').value = V.toFixed(1);
         };
 
+        // --- FUNÇÃO PREENCHER TESTE (CORRIGIDA) ---
         window.triggerExampleData = () => {
-            appState.isFreeExample=true; setStatus("SIMULAÇÃO", "Dados fictícios", "alert-warning", "fa-magic", true);
+            appState.isFreeExample=true; 
+            setStatus("SIMULAÇÃO", "Dados fictícios gerados. Não consome créditos.", "alert-warning", "fa-magic", true);
             const r = (min,max)=>(Math.random()*(max-min)+min).toFixed(1);
+            const r2 = (min,max)=>(Math.random()*(max-min)+min).toFixed(2);
             
-            // PREENCHE TUDO
-            document.getElementById('ownerName').value="Agricultor Exemplo";
-            document.getElementById('propName').value="Fazenda Esperança";
+            // 1. Preenche todos os campos (Dados Gerais)
+            document.getElementById('ownerName').value="Produtor Teste";
+            document.getElementById('propName').value="Fazenda Modelo";
             document.getElementById('cityState').value="Uberlândia - MG";
             document.getElementById('techResp').value="Dr. Agrônomo";
-            document.getElementById('protocolId').value="L-99";
-            document.getElementById('targetYield').value=160;
             
-            // Quimica
+            // 2. Identificação e Cultura
+            document.getElementById('protocolId').value="L-2023-99";
+            document.getElementById('plotId').value="Talhão 01";
+            document.getElementById('sampleDate').value=new Date().toISOString().split('T')[0];
+            document.getElementById('targetYield').value=160;
+            document.getElementById('rowSpacing').value="0.50";
+            document.getElementById('plantSpacing').value="0.20";
+            
+            // 3. Quimica
             document.getElementById('soilPH').value=r(4.5, 6.5);
             document.getElementById('soilMO').value=r(1.5, 4.0);
-            document.getElementById('soilP').value=r(8, 45);
+            document.getElementById('soilP').value=r(10, 50);
             document.getElementById('soilS').value=r(5, 15);
-            document.getElementById('soilK').value=r(0.1, 0.6); // cmolc
+            document.getElementById('soilK').value=r2(0.1, 0.6); 
             document.getElementById('soilCa').value=r(1.5, 5.0);
             document.getElementById('soilMg').value=r(0.5, 2.0);
             document.getElementById('soilHAl').value=r(2.0, 5.0);
             document.getElementById('soilAl').value=r(0, 1.0);
             
-            // Fisica e Micro
+            // 4. Fisica e Micro
             document.getElementById('soilClay').value=r(20, 60);
             document.getElementById('soilSand').value=r(10, 40);
             document.getElementById('soilZn').value=r(0.5, 3.0);
@@ -507,29 +447,53 @@
             document.getElementById('soilMn').value=r(5, 30);
             document.getElementById('soilCu').value=r(0.5, 2.0);
             document.getElementById('soilFe').value=r(15, 60);
-            document.getElementById('soilMo').value="0.05";
+            document.getElementById('soilMo').value=r2(0.01, 0.1);
 
+            // Calcula campos read-only
             window.calculateComplex();
             
-            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=true; el.classList.add('demo-locked');});
-            els.btnCalc.innerHTML="SALVAR (SIMULAÇÃO)";
+            // TRAVA TUDO
+            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{
+                el.readOnly = true; 
+                el.classList.add('demo-locked');
+                if(el.tagName === 'SELECT') el.disabled = true;
+            });
+            
+            // Muda Botão
+            els.btnCalc.innerHTML = '<i class="fas fa-calculator me-2"></i> SIMULAR (GRÁTIS)';
             els.btnCalc.classList.replace('btn-save-green', 'btn-warning');
         };
 
         window.resetToRealMode = () => {
-            appState.isFreeExample=false; document.getElementById('statusAlert').style.display='none';
-            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=false; el.classList.remove('demo-locked'); el.value=''; if(el.id==='limePRNT')el.value=80;});
-            els.btnCalc.innerHTML='Salvar Amostra';
+            appState.isFreeExample = false; 
+            document.getElementById('statusAlert').style.display = 'none';
+            // Destrava e Limpa
+            document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{
+                el.readOnly = false; 
+                el.classList.remove('demo-locked'); 
+                el.value = ''; 
+                if(el.tagName === 'SELECT') el.disabled = false;
+                if(el.id === 'limePRNT') el.value = 80;
+                if(el.id === 'systemType') el.selectedIndex = 0;
+            });
+            els.btnCalc.innerHTML = '<i class="fas fa-check-circle me-2"></i> GERAR RECOMENDAÇÃO';
             els.btnCalc.classList.replace('btn-warning', 'btn-save-green');
             document.getElementById('resultsSection').style.display='none';
         };
 
         // --- GERAÇÃO E LÓGICA IAC 100 COMPLETA E DETALHADA ---
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
+            e.preventDefault();
             const isReal = !appState.isDemo && !appState.isFreeExample;
-            if(isReal) {
-                if(!currentUserData || currentUserData.credits<=0) return alert("Sem créditos.");
-                try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(err){return alert("Erro rede");}
+            
+            if (isReal) {
+                if (!auth.currentUser || !currentUserData) return alert("Faça login novamente.");
+                if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
+                try {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
+                    currentUserData.credits--;
+                    updateHeader();
+                } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
             }
 
             const get = id => parseFloat(document.getElementById(id).value)||0;
@@ -545,12 +509,7 @@
             };
 
             // 1. Calagem (IAC 100)
-            // NC = (V2 - V1) * CTC / 10*PRNT (se CTC em mmolc e resultado em t/ha)
-            let nc = 0;
-            if(data.V < 70) {
-                nc = ((70 - data.V) * data.CTC) / (10 * data.PRNT);
-            }
-            nc = Math.max(0, nc);
+            let nc = Math.max(0, data.V < 70 ? ((70 - data.V) * data.CTC) / (10 * data.PRNT) : 0);
             let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
             
             // 2. Classificação Textural
@@ -559,47 +518,29 @@
             else if (data.clay <= 60) texClass = "Média";
             else texClass = "Argilosa";
 
-            // 3. Fósforo (IAC Tabela 1 Completa - if/else detalhados)
+            // 3. Fósforo (IAC Tabela 1 Completa)
             let recP = 0;
             if(texClass === "Arenosa") {
-                if(data.P <= 10) recP = 80;
-                else if(data.P <= 20) recP = 60;
-                else if(data.P <= 30) recP = 40;
-                else recP = 20;
+                if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
             } else if(texClass === "Média") {
-                if(data.P <= 10) recP = 100;
-                else if(data.P <= 20) recP = 80;
-                else if(data.P <= 30) recP = 60;
-                else recP = 40;
+                if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
             } else { // Argilosa
-                if(data.P <= 10) recP = 120;
-                else if(data.P <= 20) recP = 100;
-                else if(data.P <= 30) recP = 80;
-                else recP = 60;
+                if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
             }
 
             // 4. Potássio (IAC Tabela 1 Completa - K em mmolc)
             let recK = 0;
             if(texClass === "Arenosa") {
-                if(data.K <= 0.8) recK = 80;
-                else if(data.K <= 1.5) recK = 60;
-                else if(data.K <= 2.5) recK = 40;
-                else recK = 20;
+                if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
             } else if(texClass === "Média") {
-                if(data.K <= 1.0) recK = 100;
-                else if(data.K <= 2.0) recK = 80;
-                else if(data.K <= 3.5) recK = 60;
-                else recK = 40;
+                if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
             } else { // Argilosa
-                if(data.K <= 1.2) recK = 120;
-                else if(data.K <= 2.5) recK = 100;
-                else if(data.K <= 4.5) recK = 80;
-                else recK = 60;
+                if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
             }
 
             // 5. Nitrogênio (IAC Tabela 2 Completa)
             let recN = 0;
-            const highYield = data.yield > 100; // > 100 sc/ha (6t)
+            const highYield = data.yield > 100;
             const prevCulture = document.getElementById('prevCulture').value;
             
             if(prevCulture === "milho") recN = highYield ? 80 : 60;
@@ -682,7 +623,6 @@ B) ADUBAÇÃO DE COBERTURA
 Sistema de Recomendação Agronômica (SRA)
 `;
 
-            // Exibir Resultado
             document.getElementById('resultsSection').style.display = 'block';
             document.getElementById('finalReportText').value = laudo.trim();
             
@@ -701,7 +641,7 @@ Sistema de Recomendação Agronômica (SRA)
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // Preencher dados do Export Oculto (DOC/PDF)
+            // Preencher dados do Export Oculto (DOC)
             document.getElementById('doc_owner').innerText = data.owner;
             document.getElementById('doc_prop').innerText = data.prop;
             document.getElementById('doc_season').innerText = data.season.toUpperCase();
@@ -738,7 +678,6 @@ Sistema de Recomendação Agronômica (SRA)
         // Utils
         function setStatus(t,m,c,i,r){const e=document.getElementById('statusAlert');e.className=`alert shadow-sm ${c}`;e.style.display='block';document.getElementById('statusTitle').innerText=t;document.getElementById('statusMsg').innerText=m;document.getElementById('statusIcon').innerHTML=`<i class="fas ${i}"></i>`;document.getElementById('returnBtnContainer').style.display=r?'block':'none';}
         window.shareWhatsapp=()=>window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
-        window.shareEmail=()=>location.href=`mailto:?body=${encodeURIComponent(document.getElementById('finalReportText').value)}`;
         
         window.openHistoryModal=()=>{
             const l=document.getElementById('localHistoryList'), d=JSON.parse(localStorage.getItem('sra_local_history'))||[];
