@@ -18,6 +18,7 @@
             --dark-green: #1b5e20;
             --light-green: #e8f5e9;
             --accent-color: #43a047;
+            --soil-brown: #795548;
         }
         body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
         
@@ -27,7 +28,7 @@
             color: white; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Estilos do Formulário */
+        /* Estilo do Formulário */
         .form-section-title {
             font-size: 1.1rem; font-weight: 700; color: #1b5e20;
             margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;
@@ -73,11 +74,6 @@
 
         /* Container Oculto Word */
         #exportContent { display: none; }
-        
-        /* Alerta de Modo Offline */
-        .offline-badge {
-            background: #ff9800; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-left: 10px;
-        }
     </style>
 </head>
 <body>
@@ -89,21 +85,17 @@
                 <i class="fas fa-leaf text-success fa-4x"></i>
                 <h3 class="fw-bold mt-3">SRA Milho</h3>
                 <p class="text-muted">Acesso ao Sistema</p>
-                <div id="firebaseStatus" class="alert alert-warning small d-none">
-                    <i class="fas fa-exclamation-triangle"></i> Sem conexão com Banco de Dados. <br>O login será simulado localmente.
-                </div>
             </div>
             <div class="mb-3">
                 <label class="form-label">E-mail</label>
-                <input type="email" id="loginEmail" class="form-control" placeholder="teste@email.com">
+                <input type="email" id="loginEmail" class="form-control">
             </div>
             <div class="mb-4">
                 <label class="form-label">Senha</label>
-                <input type="password" id="loginPass" class="form-control" placeholder="******">
+                <input type="password" id="loginPass" class="form-control">
             </div>
             <div class="d-grid gap-2">
                 <button class="btn btn-success btn-lg fw-bold" id="btnLoginAction">ENTRAR</button>
-                <!-- Botão Google só aparece se configurado, ou simulamos o clique -->
                 <button class="btn btn-outline-dark" id="btnGoogleAction"><i class="fab fa-google me-2"></i> Google</button>
             </div>
             <div class="text-center mt-4">
@@ -112,10 +104,10 @@
             </div>
         </div>
         
-        <!-- Outras telas de Auth (Cadastro, Token, etc) -->
+        <!-- Cadastro -->
         <div id="registerForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold mb-4">Nova Conta</h4>
-            <div class="mb-3"><label>Nome</label><input type="text" id="regName" class="form-control"></div>
+            <div class="mb-3"><label>Nome Completo</label><input type="text" id="regName" class="form-control"></div>
             <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
             <div class="mb-4"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
             <div class="d-grid gap-2">
@@ -123,11 +115,15 @@
                 <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
             </div>
         </div>
+
+        <!-- Recuperar Senha -->
         <div id="forgotForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
             <div class="mb-4"><label>E-mail</label><input type="email" id="forgotEmail" class="form-control"></div>
-            <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
+            <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR EMAIL</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
         </div>
+
+        <!-- Token -->
         <div id="tokenForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold text-primary mb-2">Créditos</h4>
             <div class="bg-light p-3 rounded text-center mb-4 border"><h1 class="text-dark m-0" id="displayAuthCode">----</h1></div>
@@ -145,7 +141,7 @@
                     <i class="fas fa-file-signature fa-lg me-2"></i>
                     <div>
                         <h5 class="m-0 fw-bold">Amostras de Solo</h5>
-                        <small class="text-white-50" id="connectionStatus">Conectado</small>
+                        <small class="text-white-50">Conectado (Firebase)</small>
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
@@ -174,6 +170,7 @@
                 </div>
             </div>
 
+            <!-- Formulário -->
             <div class="card-custom">
                 <div class="d-flex justify-content-end mb-3">
                     <button type="button" class="btn btn-fill-purple" onclick="triggerExampleData()">
@@ -202,6 +199,7 @@
                             <div class="col-md-3"><label class="form-label">Talhão</label><input type="text" class="form-control" id="plotId"></div>
                             <div class="col-md-3"><label class="form-label">Profundidade</label><input type="text" class="form-control" value="0-20"></div>
                             <div class="col-md-3"><label class="form-label">Data</label><input type="date" class="form-control" id="sampleDate"></div>
+                            
                             <div class="col-md-3"><label class="form-label">Cultura</label><select class="form-select" id="cropSeason"><option value="verao">Milho Verão</option><option value="safrinha">Milho Safrinha</option></select></div>
                             <div class="col-md-3"><label class="form-label">Meta (sc/ha)</label><input type="number" class="form-control" id="targetYield"></div>
                             <div class="col-md-3"><label class="form-label">Esp. Linha</label><input type="number" class="form-control" id="rowSpacing" step="0.01"></div>
@@ -225,8 +223,8 @@
                             <div class="col-md-3"><label class="form-label">H+Al (cmolc)</label><input type="number" class="form-control" id="soilHAl" step="0.1" oninput="calculateComplex()"></div>
                             
                             <div class="col-md-3"><label class="form-label">Al (cmolc)</label><input type="number" class="form-control" id="soilAl" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label bg-readonly">CTC</label><input type="number" class="form-control bg-readonly" id="soilCTC" readonly></div>
-                            <div class="col-md-3"><label class="form-label bg-readonly">V%</label><input type="number" class="form-control bg-readonly" id="soilV" readonly></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">CTC (Calc)</label><input type="number" class="form-control bg-readonly" id="soilCTC" readonly></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">V% (Calc)</label><input type="number" class="form-control bg-readonly" id="soilV" readonly></div>
                             <div class="col-md-3"><label class="form-label">PRNT</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
                         </div>
                     </div>
@@ -246,7 +244,12 @@
                         </div>
                     </div>
 
-                    <!-- Botões -->
+                    <!-- Híbrido Options -->
+                    <div class="d-flex gap-3 mb-3 small text-muted justify-content-center">
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="checkSaveCloud" checked><label>Salvar Nuvem</label></div>
+                        <div class="form-check"><input class="form-check-input" type="checkbox" id="checkSaveLocal" checked><label>Salvar Local</label></div>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="button" id="btnCalculate" class="btn-save-green" onclick="generateRecommendation()">Salvar Amostra</button>
                         <button type="button" class="btn-clean" onclick="resetToRealMode()">Limpar</button>
@@ -258,13 +261,13 @@
             <div id="resultsSection" style="display: none;">
                 <div class="card-custom border-top border-3 border-success">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-success m-0">Laudo Técnico</h5>
-                        <button class="btn btn-primary btn-sm" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word</button>
+                        <h5 class="fw-bold text-success m-0">Laudo Técnico Gerado</h5>
+                        <button class="btn btn-primary btn-sm" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button>
                     </div>
                     
                     <ul class="nav nav-pills mb-3" id="pills-tab">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-laudo">Recomendação</button></li>
-                        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-tabela">Tabela</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-tabela">Cálculos</button></li>
                     </ul>
 
                     <div class="tab-content">
@@ -289,17 +292,21 @@
     <!-- MODAL HISTÓRICO -->
     <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Amostras Salvas (Local)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-sm btn-outline-danger" onclick="clearLocalHistory()">Limpar</button></div></div></div></div>
 
-    <!-- TEMPLATE DOC -->
-    <div id="exportContent" style="display:none">
-        <div class="doc-header"><h1 style="color:#2e7d32">LAUDO TÉCNICO</h1><p>SRA MILHO - IAC 100</p></div>
+    <!-- TEMPLATE EXPORTAÇÃO (WORD) -->
+    <div id="exportContent">
+        <div class="doc-header">
+            <h1 class="doc-title" style="color:#2e7d32">LAUDO DE RECOMENDAÇÃO AGRONÔMICA</h1>
+            <p>SRA MILHO - IAC 100</p>
+        </div>
         <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">1. IDENTIFICAÇÃO</div>
         <p><strong>Produtor:</strong> <span id="doc_owner"></span> | <strong>Propriedade:</strong> <span id="doc_prop"></span></p>
         <p><strong>Safra:</strong> <span id="doc_season"></span> | <strong>Meta:</strong> <span id="doc_yield"></span> sc/ha</p>
         <p><strong>Solo:</strong> <span id="doc_texture"></span> | <strong>V%:</strong> <span id="doc_v"></span>%</p>
-        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">2. RECOMENDAÇÃO</div>
-        <div id="doc_body_content" style="white-space: pre-wrap;"></div>
-        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">3. CÁLCULOS</div>
+        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">2. RECOMENDAÇÃO TÉCNICA</div>
+        <div id="doc_body_content" style="white-space: pre-wrap; font-family: Arial, sans-serif;"></div>
+        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">3. RESUMO ANALÍTICO</div>
         <div id="doc_table_container"></div>
+        <p style="text-align:center;font-size:10px;margin-top:30px;border-top:1px solid #ccc;padding-top:5px">Documento gerado pelo SRA.</p>
     </div>
 
     <!-- JS -->
@@ -309,11 +316,7 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- MODO DE SEGURANÇA (FALLBACK) ---
-        // Se as chaves do Firebase estiverem inválidas, usamos o modo local.
-        let useOfflineMode = false;
-		
-//##################################
+        // SUAS CHAVES DO FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
   authDomain: "milho-iac.firebaseapp.com",
@@ -323,126 +326,130 @@ const firebaseConfig = {
   appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
   measurementId: "G-07R2DFGE8T"
 };
-
-
-
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
         let app, auth, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } catch (e) {
-            console.error("Firebase Init Error:", e);
-            useOfflineMode = true; // ATIVA MODO OFFLINE AUTOMATICAMENTE
-        }
+        try { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); } catch(e){ console.warn("Firebase config error"); }
 
         let currentUserData = null;
         let appState = { isDemo: false, isFreeExample: false, generatedCode: null };
 
-        // --- AUTH LOGIC (COM FALLBACK) ---
-        if (!useOfflineMode) {
-            onAuthStateChanged(auth, async (user) => {
-                if(user){
-                    try {
-                        const snap = await getDoc(doc(db,"users",user.uid));
-                        currentUserData = snap.exists() ? snap.data() : {name:user.email.split('@')[0], email:user.email, credits:3};
-                        if(!snap.exists()) await setDoc(doc(db,"users",user.uid), currentUserData);
-                        showAppUI();
-                    } catch(e) {
-                        // Se falhar leitura (ex: regras), entra offline
-                        fallbackLogin();
-                    }
-                } else { currentUserData=null; showAuthUI('login'); }
-            });
-        } else {
-            // Se estiver em modo offline, mostra aviso na tela de login
-            document.getElementById('firebaseStatus').classList.remove('d-none');
-        }
+        const els = {
+            authScreen: document.getElementById('authScreen'), appContainer: document.getElementById('appContainer'),
+            loginForm: document.getElementById('loginForm'), regForm: document.getElementById('registerForm'), tokenForm: document.getElementById('tokenForm'), forgotForm: document.getElementById('forgotForm'),
+            creditCounter: document.getElementById('creditCounter'), userName: document.getElementById('userNameDisplay'), btnCalc: document.getElementById('btnCalculate')
+        };
 
-        function fallbackLogin() {
-            // Login Simulado Local
-            currentUserData = { name: "Usuário Local", email: "local@admin", credits: 99 };
-            document.getElementById('connectionStatus').innerText = "Modo Offline";
-            document.getElementById('connectionStatus').className = "text-warning small fw-bold";
-            showAppUI();
-        }
+        // AUTH
+        onAuthStateChanged(auth, async (user) => {
+            if(user){
+                const snap = await getDoc(doc(db,"users",user.uid));
+                currentUserData = snap.exists() ? snap.data() : {name:user.email.split('@')[0], email:user.email, credits:3};
+                if(!snap.exists()) await setDoc(doc(db,"users",user.uid), currentUserData);
+                showAppUI();
+            } else { currentUserData=null; showAuthUI('login'); }
+        });
 
         window.toggleAuth=(s)=>{ ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); document.getElementById(s+'Form').style.display='block'; };
-        window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); };
-        window.handleLogout=()=>{ if(confirm("Sair?")) { if(!useOfflineMode) signOut(auth).then(()=>location.reload()); else location.reload(); }};
+        window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); setStatus("DEMO", "Visualização", "alert-danger", "fa-ban", false); triggerExampleData(); };
+        window.handleLogout=()=>{ if(confirm("Sair?")) signOut(auth).then(()=>location.reload()); };
 
-        // Listeners (Wrapper para evitar erro se auth for null)
-        document.getElementById('btnLoginAction').addEventListener('click', () => {
-            if(useOfflineMode || document.getElementById('loginEmail').value === "admin@local") {
-                fallbackLogin();
-            } else {
-                signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message));
-            }
-        });
-        
-        document.getElementById('btnRegAction').addEventListener('click', () => {
-            if(useOfflineMode) return alert("Cadastro indisponível no modo offline.");
-            createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message));
-        });
+        // Listeners
+        document.getElementById('btnLoginAction').addEventListener('click',()=>signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message)));
+        document.getElementById('btnRegAction').addEventListener('click',()=>createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message)));
+        document.getElementById('btnGoogleAction').addEventListener('click',()=>signInWithPopup(auth, new GoogleAuthProvider()).catch(e=>console.error(e)));
+        document.getElementById('btnForgotAction').addEventListener('click',()=>sendPasswordResetEmail(auth, document.getElementById('forgotEmail').value).then(()=>alert("Verifique e-mail")).catch(e=>alert(e.message)));
 
         // UI
-        function showAppUI(){ document.getElementById('authScreen').style.display='none'; document.getElementById('appContainer').style.display='block'; updateHeader(); }
-        function showAuthUI(s){ document.getElementById('authScreen').style.display='flex'; document.getElementById('appContainer').style.display='none'; toggleAuth(s); }
+        function showAppUI(){ els.authScreen.style.display='none'; els.appContainer.style.display='block'; updateHeader(); }
+        function showAuthUI(s){ els.authScreen.style.display='flex'; els.appContainer.style.display='none'; toggleAuth(s); }
         function updateHeader(){ 
-            document.getElementById('creditCounter').innerText = appState.isDemo ? "DEMO" : currentUserData?.credits; 
-            document.getElementById('userNameDisplay').innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
+            els.creditCounter.innerText = appState.isDemo ? "DEMO" : currentUserData?.credits; 
+            els.userName.innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
         }
 
-        // --- CÁLCULOS (H+Al para CTC) ---
+        // Tokens
+        window.showTokenScreen = () => { els.appContainer.style.display='none'; els.authScreen.style.display='flex'; toggleAuth('token'); appState.generatedCode=Math.floor(Math.random()*9000)+1000; document.getElementById('displayAuthCode').innerText=appState.generatedCode; };
+        document.getElementById('btnTokenAction').addEventListener('click', async()=>{
+            const inp = document.getElementById('inputToken').value.replace(/\D/g,'');
+            if(inp.length<6) return alert("Inválido");
+            const exp = (appState.generatedCode+13)*9+1954;
+            if(parseInt(inp.substring(0,5))===exp && parseInt(inp.substring(5))>0) {
+                await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(parseInt(inp.substring(5)))});
+                currentUserData = (await getDoc(doc(db,"users",auth.currentUser.uid))).data();
+                alert("Sucesso!"); showAppUI();
+            } else alert("Senha incorreta");
+        });
+
+        // --- CÁLCULOS COMPLEXOS (H+Al) ---
         window.calculateComplex = () => {
             const get = id => parseFloat(document.getElementById(id).value)||0;
-            const K = get('soilK'); const Ca = get('soilCa'); const Mg = get('soilMg'); const HAl = get('soilHAl');
+            const K = get('soilK');
+            const Ca = get('soilCa');
+            const Mg = get('soilMg');
+            const HAl = get('soilHAl');
+
             const SB = Ca + Mg + K;
             const CTC = SB + HAl;
             const V = CTC > 0 ? (SB / CTC) * 100 : 0;
+
             document.getElementById('soilCTC').value = CTC.toFixed(2);
             document.getElementById('soilV').value = V.toFixed(1);
         };
 
         window.triggerExampleData = () => {
-            appState.isFreeExample=true;
+            appState.isFreeExample=true; setStatus("SIMULAÇÃO", "Dados fictícios", "alert-warning", "fa-magic", true);
             const r = (min,max)=>(Math.random()*(max-min)+min).toFixed(1);
-            document.getElementById('ownerName').value="João Silva";
+            const r2 = (min,max)=>(Math.random()*(max-min)+min).toFixed(2);
+            
+            // Preencher TUDO
+            document.getElementById('ownerName').value="Agricultor Exemplo";
             document.getElementById('propName').value="Fazenda Esperança";
-            document.getElementById('cityState').value="Jataí-GO";
-            document.getElementById('techResp').value="Dr. Carlos";
+            document.getElementById('cityState').value="Uberlândia - MG";
+            document.getElementById('techResp').value="Eng. Carlos Silva";
+            document.getElementById('protocolId').value="L-2023-99";
+            document.getElementById('plotId').value="Talhão A1";
+            document.getElementById('sampleDate').value=new Date().toISOString().split('T')[0];
             document.getElementById('targetYield').value=160;
-            document.getElementById('soilClay').value=35;
-            document.getElementById('soilP').value=12;
-            document.getElementById('soilK').value=0.25; document.getElementById('soilCa').value=3.5;
-            document.getElementById('soilMg').value=1.2; document.getElementById('soilHAl').value=3.0;
+            
+            // Quimica
+            document.getElementById('soilPH').value=r(4.5, 6.5);
+            document.getElementById('soilMO').value=r(1.5, 4.5);
+            document.getElementById('soilP').value=r(8, 40);
+            document.getElementById('soilS').value=r(5, 15);
+            document.getElementById('soilK').value=r2(0.1, 0.6); // cmolc
+            document.getElementById('soilCa').value=r(1.5, 5.0);
+            document.getElementById('soilMg').value=r(0.5, 2.0);
+            document.getElementById('soilHAl').value=r(2.0, 5.0);
+            document.getElementById('soilAl').value=r(0, 1.5);
+            
+            // Fisica e Micro
+            document.getElementById('soilClay').value=r(20, 60);
+            document.getElementById('soilSand').value=r(10, 40);
+            document.getElementById('soilZn').value=r(0.5, 3.0);
+            document.getElementById('soilB').value=r(0.2, 0.8);
+            document.getElementById('soilMn').value=r(5, 30);
+            document.getElementById('soilCu').value=r(0.5, 2.0);
+            document.getElementById('soilFe').value=r(15, 60);
+            document.getElementById('soilMo').value=r2(0.01, 0.1);
+
             window.calculateComplex();
+            
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=true; el.classList.add('demo-locked');});
-            document.getElementById('btnCalculate').innerHTML="SALVAR (SIMULAÇÃO)";
+            els.btnCalc.innerHTML="SALVAR (SIMULAÇÃO)";
         };
 
         window.resetToRealMode = () => {
-            appState.isFreeExample=false;
+            appState.isFreeExample=false; document.getElementById('statusAlert').style.display='none';
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=false; el.classList.remove('demo-locked'); el.value=''; if(el.id==='limePRNT')el.value=80;});
-            document.getElementById('btnCalculate').innerHTML='Salvar Amostra';
+            els.btnCalc.innerHTML='Salvar Amostra';
             document.getElementById('resultsSection').style.display='none';
         };
 
-        // --- CÁLCULO IAC E GERAÇÃO ---
-        window.generateRecommendation = async () => {
+        // --- GERAÇÃO IAC 100 ---
+        document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             const isReal = !appState.isDemo && !appState.isFreeExample;
             if(isReal) {
                 if(!currentUserData || currentUserData.credits<=0) return alert("Sem créditos.");
-                if(!useOfflineMode) {
-                    try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(e){return alert("Erro rede");}
-                } else {
-                    currentUserData.credits--; updateHeader(); // Local decrement
-                }
+                try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(e){return alert("Erro rede");}
             }
 
             const get = id => parseFloat(document.getElementById(id).value)||0;
@@ -453,11 +460,10 @@ const analytics = getAnalytics(app);
                 yield: get('targetYield'),
                 clay: get('soilClay'), P: get('soilP'),
                 K: get('soilK') * 10, // cmolc -> mmolc
-                V: get('soilV'), CTC: get('soilCTC') * 10, // mmolc
-                PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10 // mmolc
+                V: get('soilV'), CTC: get('soilCTC') * 10, 
+                PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10
             };
 
-            // Lógica IAC
             let nc = Math.max(0, data.V < 70 ? ((70 - data.V) * data.CTC) / (10 * data.PRNT) : 0);
             let lime = data.Mg < 5 ? "Dolomítico" : "Calcítico";
             let tex = data.clay<=20 ? "Arenosa" : (data.clay<=60 ? "Média" : "Argilosa");
@@ -468,14 +474,14 @@ const analytics = getAnalytics(app);
 
             const map = recP/0.52, kcl = recK/0.60, urea = Math.max(0, recN-(map*0.11))/0.45, gesso = data.clay*50/1000;
 
-            const laudo = `LAUDO TÉCNICO DE RECOMENDAÇÃO\nBase: IAC 100\nData: ${new Date().toLocaleDateString()}\n------------------------------\nPRODUTOR: ${data.owner} | ${data.prop}\nSAFRA: ${data.season.toUpperCase()} | META: ${data.yield} sc/ha\nSOLO: ${tex} (${data.clay}% Argila) | V%: ${data.V}\n\n1. CORREÇÃO\n> CALAGEM: ${nc.toFixed(1)} t/ha Calcário ${lime} (V% 70)\n> GESSAGEM: ${gesso.toFixed(1)} t/ha\n\n2. ADUBAÇÃO (N-P-K)\nNecessidade: N ${recN.toFixed(0)} | P2O5 ${recP} | K2O ${recK.toFixed(0)} kg/ha\n\nMANEJO:\nA) PLANTIO: ${Math.round(map)} kg/ha MAP + ${Math.round(kcl/2)} kg/ha KCl\nB) COBERTURA: ${Math.round(urea)} kg/ha Ureia + ${Math.round(kcl/2)} kg/ha KCl\n\nSRA Milho`;
+            const laudo = `LAUDO TÉCNICO DE RECOMENDAÇÃO\nBase: IAC 100 (2022)\nData: ${new Date().toLocaleDateString()}\n------------------------------\nPRODUTOR: ${data.owner} | ${data.prop}\nSAFRA: ${data.season.toUpperCase()} | META: ${data.yield} sc/ha\nSOLO: ${tex} (${data.clay}% Argila) | V%: ${data.V}\n\n1. CORREÇÃO\n> CALAGEM: ${nc.toFixed(1)} t/ha Calcário ${lime} (V% 70)\n> GESSAGEM: ${gesso.toFixed(1)} t/ha\n\n2. ADUBAÇÃO (N-P-K)\nNecessidade: N ${recN.toFixed(0)} | P2O5 ${recP} | K2O ${recK.toFixed(0)} kg/ha\n\nMANEJO:\nA) PLANTIO: ${Math.round(map)} kg/ha MAP + ${Math.round(kcl/2)} kg/ha KCl\nB) COBERTURA: ${Math.round(urea)} kg/ha Ureia + ${Math.round(kcl/2)} kg/ha KCl\n\nSRA Milho`;
 
             document.getElementById('resultsSection').style.display='block';
             document.getElementById('finalReportText').value=laudo;
             document.getElementById('techTableBody').innerHTML=`<tr><td>Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr><tr><td>Gesso</td><td>${gesso.toFixed(1)}</td><td>t/ha</td></tr><tr><td>MAP</td><td>${Math.round(map)}</td><td>kg/ha</td></tr><tr><td>Ureia</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>`;
             document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
 
-            // Doc Export
+            // Export Data
             document.getElementById('doc_owner').innerText = data.owner;
             document.getElementById('doc_prop').innerText = data.prop;
             document.getElementById('doc_season').innerText = data.season;
@@ -485,13 +491,15 @@ const analytics = getAnalytics(app);
             document.getElementById('doc_body_content').innerText = laudo.split("1. CORREÇÃO")[1];
             document.getElementById('doc_table_container').innerHTML = `<table class="doc-table"><thead><tr><th>Item</th><th>Valor</th><th>Unid</th></tr></thead><tbody>${document.getElementById('techTableBody').innerHTML}</tbody></table>`;
 
-            // Save Local
-            const h=JSON.parse(localStorage.getItem('sra_local_history'))||[]; h.unshift({date:new Date().toISOString(), owner:data.owner, result:laudo}); localStorage.setItem('sra_local_history',JSON.stringify(h));
+            // Save
+            const rObj = {date:new Date().toISOString(), owner:data.owner, result:laudo};
+            if(isReal && document.getElementById('checkSaveCloud').checked) try{await addDoc(collection(db,"users",auth.currentUser.uid,"reports"),{...rObj,timestamp:serverTimestamp()});}catch(e){}
+            if(document.getElementById('checkSaveLocal').checked){ const h=JSON.parse(localStorage.getItem('sra_local_history'))||[]; h.unshift(rObj); localStorage.setItem('sra_local_history',JSON.stringify(h)); }
         };
 
         // Utils
+        function setStatus(t,m,c,i,r){const e=document.getElementById('statusAlert');e.className=`alert shadow-sm ${c}`;e.style.display='block';document.getElementById('statusTitle').innerText=t;document.getElementById('statusMsg').innerText=m;document.getElementById('statusIcon').innerHTML=`<i class="fas ${i}"></i>`;document.getElementById('returnBtnContainer').style.display=r?'block':'none';}
         window.shareWhatsapp=()=>window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
-        window.shareEmail=()=>location.href=`mailto:?body=${encodeURIComponent(document.getElementById('finalReportText').value)}`;
         
         window.openHistoryModal=()=>{
             const l=document.getElementById('localHistoryList'), d=JSON.parse(localStorage.getItem('sra_local_history'))||[];
@@ -501,7 +509,7 @@ const analytics = getAnalytics(app);
         };
         window.clearLocalHistory=()=>{ if(confirm("Apagar?")){localStorage.removeItem('sra_local_history'); window.openHistoryModal();} };
 
-        // --- WORD DOWNLOAD ---
+        // Export DOCX (.docx real)
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
             const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:'Calibri',sans-serif;font-size:11pt} h1{color:#2e7d32;font-size:16pt;margin-bottom:5px} p{margin-bottom:10px} table{width:100%;border-collapse:collapse;margin-top:15px} th,td{border:1px solid #ccc;padding:5px;text-align:center} th{background-color:#f2f2f2}</style></head><body>${content}</body></html>`;
@@ -510,11 +518,9 @@ const analytics = getAnalytics(app);
                 const link = document.createElement('a'); link.href = URL.createObjectURL(converted);
                 link.download = `Laudo_${document.getElementById('ownerName').value || 'SRA'}.docx`;
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            } else { alert("Erro ao carregar biblioteca DOCX."); }
+            } else { alert("Erro ao carregar biblioteca DOCX. Verifique a internet."); }
         };
 
-        // --- TOKEN (CREDITOS) ---
-        window.showTokenScreen = () => { document.getElementById('appContainer').style.display='none'; document.getElementById('authScreen').style.display='flex'; toggleAuth('token'); };
     </script>
 </body>
 </html>
