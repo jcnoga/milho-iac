@@ -144,12 +144,43 @@
             <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR EMAIL</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
         </div>
 
-        <!-- Token -->
+        <!-- Token (RECONSTRUÍDO E APRIMORADO) -->
         <div id="tokenForm" class="auth-card" style="display:none;">
-            <h4 class="text-center fw-bold text-primary mb-2">Créditos</h4>
-            <div class="bg-light p-3 rounded text-center mb-4 border"><h1 class="text-dark m-0" id="displayAuthCode">----</h1></div>
-            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center" form-control-lg" placeholder="Senha"></div>
-            <div class="d-grid gap-2"><button class="btn btn-success fw-bold" id="btnTokenAction">VALIDAR</button><button class="btn btn-link text-danger" onclick="startUnauthorized()">Modo Demonstração</button></div>
+            <div class="text-center mb-3">
+                <i class="fas fa-ticket-alt text-warning fa-3x"></i>
+                <h4 class="fw-bold mt-2">Adicionar Créditos</h4>
+                <p class="text-muted small">Passo 1: Envie o código abaixo.</p>
+            </div>
+
+            <div class="bg-light border border-secondary rounded p-3 text-center mb-3">
+                <span class="text-uppercase small fw-bold text-muted">Seu Código de Sistema</span>
+                <h1 class="display-4 fw-bold text-dark m-0" id="displayAuthCode" style="letter-spacing: 2px;">----</h1>
+            </div>
+
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <button class="btn btn-success w-100 btn-sm" onclick="sendTokenToWhatsapp()">
+                        <i class="fab fa-whatsapp me-1"></i> Enviar Whats
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button class="btn btn-secondary w-100 btn-sm" onclick="sendTokenToEmail()">
+                        <i class="fas fa-envelope me-1"></i> Enviar Email
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-muted small text-center mb-2">Passo 2: Insira a senha recebida.</p>
+            <div class="mb-3">
+                <input type="text" id="inputToken" class="form-control text-center form-control-lg border-primary" placeholder="Cole a senha aqui">
+            </div>
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary fw-bold btn-lg" id="btnTokenAction">
+                    <i class="fas fa-check-circle me-2"></i> VALIDAR CRÉDITOS
+                </button>
+                <button class="btn btn-link text-secondary" onclick="toggleAuth('backToApp')">Cancelar / Voltar</button>
+            </div>
         </div>
     </div>
 
@@ -171,7 +202,7 @@
                             <li><a class="dropdown-item" href="#" onclick="showTokenScreen()">Adicionar Créditos</a></li>
                         </ul>
                     </div>
-                    <button class="btn btn-sm btn-danger fw-bold" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+                    <button class="btn btn-sm btn-danger fw-bold" onclick="handleLogout()">SAIR</button>
                 </div>
             </div>
         </header>
@@ -293,8 +324,8 @@
                         <div class="tab-pane fade show active" id="pills-laudo">
                             <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="20" readonly></textarea>
                             <div class="d-grid gap-2 d-md-block">
-                                <button class="btn btn-success fw-bold" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button>
-                                <button class="btn btn-outline-secondary fw-bold" onclick="shareEmail()"><i class="fas fa-envelope me-2"></i> E-mail</button>
+                                <button class="btn btn-success fw-bold" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> Enviar Email (Cópia)</button>
+                                <button class="btn btn-outline-secondary fw-bold" onclick="shareEmail()"><i class="fas fa-envelope me-2"></i> E-mail (Link)</button>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pills-tabela">
@@ -328,6 +359,7 @@
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
+        // --- FIREBASE IMPORT ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -366,11 +398,19 @@
             } else { currentUserData=null; showAuthUI('login'); }
         });
 
-        window.toggleAuth=(s)=>{ ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); document.getElementById(s+'Form').style.display='block'; };
+        window.toggleAuth=(s)=>{ 
+            ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); 
+            if(s === 'backToApp') {
+                 if(auth.currentUser) showAppUI(); else showAuthUI('login');
+                 return;
+            }
+            document.getElementById(s+'Form').style.display='block'; 
+        };
+
         window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); setStatus("DEMO", "Visualização", "alert-danger", "fa-ban", false); triggerExampleData(); };
         window.handleLogout=()=>{ if(confirm("Sair?")) signOut(auth).then(()=>location.reload()); };
 
-        // Listeners
+        // Listeners Auth
         document.getElementById('btnLoginAction').addEventListener('click',()=>signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message)));
         document.getElementById('btnRegAction').addEventListener('click',()=>createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message)));
         document.getElementById('btnGoogleAction').addEventListener('click',()=>signInWithPopup(auth, new GoogleAuthProvider()).catch(e=>console.error(e)));
@@ -384,55 +424,85 @@
             els.userName.innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
         }
 
-        // Tokens
-        window.showTokenScreen = () => { els.appContainer.style.display='none'; els.authScreen.style.display='flex'; toggleAuth('token'); appState.generatedCode=Math.floor(Math.random()*9000)+1000; document.getElementById('displayAuthCode').innerText=appState.generatedCode; };
+        // --- GESTÃO DE TOKEN/CRÉDITOS ---
+        window.showTokenScreen = () => { 
+            els.appContainer.style.display='none'; 
+            els.authScreen.style.display='flex'; 
+            toggleAuth('token'); 
+            appState.generatedCode=Math.floor(Math.random()*9000)+1000; 
+            document.getElementById('displayAuthCode').innerText=appState.generatedCode; 
+        };
+
+        window.sendTokenToWhatsapp = () => {
+            const code = appState.generatedCode;
+            const text = `Olá, solicito liberação de créditos para o App SRA Milho.\nMeu Código de Segurança: *${code}*`;
+            window.open(`https://wa.me/5534997824990?text=${encodeURIComponent(text)}`);
+        };
+
+        window.sendTokenToEmail = () => {
+             const code = appState.generatedCode;
+             const subject = "Solicitação de Créditos SRA Milho";
+             const body = `Olá,\n\nSolicito a senha de liberação.\nMeu Código: ${code}`;
+             window.location.href = `mailto:websitelogx@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        };
+
         document.getElementById('btnTokenAction').addEventListener('click', async()=>{
-            const inp = document.getElementById('inputToken').value.replace(/\D/g,'');
-            if(inp.length<6) return alert("Inválido");
-            const exp = (appState.generatedCode+13)*9+1954;
-            if(parseInt(inp.substring(0,5))===exp && parseInt(inp.substring(5))>0) {
-                await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(parseInt(inp.substring(5)))});
-                currentUserData = (await getDoc(doc(db,"users",auth.currentUser.uid))).data();
-                alert("Sucesso!"); showAppUI();
-            } else alert("Senha incorreta");
+            const input = document.getElementById('inputToken').value.replace(/\D/g,'');
+            if(input.length < 6) return alert("Código inválido (curto demais).");
+            
+            const hash = parseInt(input.substring(0, 5));
+            const credits = parseInt(input.substring(5));
+            const expectedHash = (appState.generatedCode + 13) * 9 + 1954;
+
+            if (hash === expectedHash && credits > 0) {
+                if (!auth.currentUser) return alert("Faça login novamente.");
+                
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(credits) });
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                currentUserData = snap.data();
+                
+                alert(`Sucesso! ${credits} créditos adicionados.`);
+                showAppUI();
+            } else {
+                alert("Senha incorreta. Verifique se copiou o código certo.");
+            }
         });
 
-        // --- CÁLCULOS COMPLEXOS DE SOLO (SOMA DE BASES E CTC) ---
+        // --- CÁLCULOS COMPLEXOS DE SOLO ---
         window.calculateComplex = () => {
             const get = id => parseFloat(document.getElementById(id).value)||0;
             const K = get('soilK'); const Ca = get('soilCa'); const Mg = get('soilMg'); 
-            const Na = get('soilNa'); 
             const HAl = get('soilHAl'); // Acidez Potencial
-
             const SB = Ca + Mg + K;
             const CTC = SB + HAl;
             const V = CTC > 0 ? (SB / CTC) * 100 : 0;
-
             document.getElementById('soilCTC').value = CTC.toFixed(2);
             document.getElementById('soilV').value = V.toFixed(1);
-            document.getElementById('soilSB').value = SB.toFixed(2);
         };
 
-        // --- FUNÇÃO PREENCHER TESTE (CORRIGIDA) ---
+        // --- FUNÇÃO PREENCHER TESTE (COMPLETA E CORRIGIDA) ---
         window.triggerExampleData = () => {
-            appState.isFreeExample=true; 
+            appState.isFreeExample = true; 
             setStatus("SIMULAÇÃO", "Dados fictícios gerados. Não consome créditos.", "alert-warning", "fa-magic", true);
             const r = (min,max)=>(Math.random()*(max-min)+min).toFixed(1);
             const r2 = (min,max)=>(Math.random()*(max-min)+min).toFixed(2);
             
-            // 1. Preenche todos os campos (Dados Gerais)
+            // 1. Dados Gerais
             document.getElementById('ownerName').value="Produtor Teste";
             document.getElementById('propName').value="Fazenda Modelo";
             document.getElementById('cityState').value="Uberlândia - MG";
             document.getElementById('techResp').value="Dr. Agrônomo";
+            document.getElementById('prevCulture').value="graminea";
             
-            // 2. Identificação e Cultura
-            document.getElementById('protocolId').value="L-2023-99";
-            document.getElementById('plotId').value="Talhão 01";
+            // 2. Identificação
+            document.getElementById('protocolId').value="L-99";
+            document.getElementById('plotId').value="A-01";
             document.getElementById('sampleDate').value=new Date().toISOString().split('T')[0];
-            document.getElementById('targetYield').value=160;
+            document.getElementById('cropSeason').value="safrinha";
+            document.getElementById('targetYield').value="140";
             document.getElementById('rowSpacing').value="0.50";
             document.getElementById('plantSpacing').value="0.20";
+            document.getElementById('systemType').value="spd_consolidado";
             
             // 3. Quimica
             document.getElementById('soilPH').value=r(4.5, 6.5);
@@ -444,6 +514,7 @@
             document.getElementById('soilMg').value=r(0.5, 2.0);
             document.getElementById('soilHAl').value=r(2.0, 5.0);
             document.getElementById('soilAl').value=r(0, 1.0);
+            document.getElementById('limePRNT').value="85";
             
             // 4. Fisica e Micro
             document.getElementById('soilClay').value=r(20, 60);
@@ -455,7 +526,7 @@
             document.getElementById('soilFe').value=r(15, 60);
             document.getElementById('soilMo').value=r2(0.01, 0.1);
 
-            // Calcula campos read-only
+            // Calcula read-only
             window.calculateComplex();
             
             // TRAVA TUDO
@@ -465,7 +536,7 @@
                 if(el.tagName === 'SELECT') el.disabled = true;
             });
             
-            // Muda Botão
+            // Botão amarelo
             els.btnCalc.innerHTML = '<i class="fas fa-calculator me-2"></i> SIMULAR (GRÁTIS)';
             els.btnCalc.classList.replace('btn-save-green', 'btn-warning');
         };
@@ -473,7 +544,7 @@
         window.resetToRealMode = () => {
             appState.isFreeExample = false; 
             document.getElementById('statusAlert').style.display = 'none';
-            // Destrava e Limpa
+            // Destrava
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{
                 el.readOnly = false; 
                 el.classList.remove('demo-locked'); 
@@ -487,7 +558,7 @@
             document.getElementById('resultsSection').style.display='none';
         };
 
-        // --- GERAÇÃO E LÓGICA IAC 100 COMPLETA E DETALHADA ---
+        // --- GERAÇÃO E LÓGICA IAC 100 COMPLETA ---
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             e.preventDefault();
             const isReal = !appState.isDemo && !appState.isFreeExample;
@@ -509,95 +580,61 @@
                 season: document.getElementById('cropSeason').value,
                 yield: get('targetYield'),
                 clay: get('soilClay'), P: get('soilP'),
-                K: get('soilK') * 10, // cmolc -> mmolc (tabela IAC usa mmolc)
-                V: get('soilV'), CTC: get('soilCTC') * 10, // mmolc
-                PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10 // mmolc
+                K: get('soilK') * 10, // cmolc -> mmolc
+                V: get('soilV'), CTC: get('soilCTC') * 10, 
+                PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10
             };
 
-            // 1. Calagem (IAC 100)
+            // Lógica IAC
             let nc = Math.max(0, data.V < 70 ? ((70 - data.V) * data.CTC) / (10 * data.PRNT) : 0);
-            let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
-            
-            // 2. Classificação Textural
+            let limeType = data.Mg < 5 ? "Dolomítico" : "Calcítico";
             let texClass = "";
             if (data.clay <= 20) texClass = "Arenosa";
             else if (data.clay <= 60) texClass = "Média";
             else texClass = "Argilosa";
 
-            // 3. Fósforo (IAC Tabela 1 Completa)
+            // Fósforo
             let recP = 0;
             if(texClass === "Arenosa") {
-                if(data.P <= 10) recP = 80;
-                else if(data.P <= 20) recP = 60;
-                else if(data.P <= 30) recP = 40;
-                else recP = 20;
+                if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
             } else if(texClass === "Média") {
-                if(data.P <= 10) recP = 100;
-                else if(data.P <= 20) recP = 80;
-                else if(data.P <= 30) recP = 60;
-                else recP = 40;
-            } else { // Argilosa
-                if(data.P <= 10) recP = 120;
-                else if(data.P <= 20) recP = 100;
-                else if(data.P <= 30) recP = 80;
-                else recP = 60;
+                if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
+            } else { 
+                if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
             }
 
-            // 4. Potássio (IAC Tabela 1 Completa - K em mmolc)
+            // Potássio
             let recK = 0;
             if(texClass === "Arenosa") {
-                if(data.K <= 0.8) recK = 80;
-                else if(data.K <= 1.5) recK = 60;
-                else if(data.K <= 2.5) recK = 40;
-                else recK = 20;
+                if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
             } else if(texClass === "Média") {
-                if(data.K <= 1.0) recK = 100;
-                else if(data.K <= 2.0) recK = 80;
-                else if(data.K <= 3.5) recK = 60;
-                else recK = 40;
-            } else { // Argilosa
-                if(data.K <= 1.2) recK = 120;
-                else if(data.K <= 2.5) recK = 100;
-                else if(data.K <= 4.5) recK = 80;
-                else recK = 60;
+                if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
+            } else { 
+                if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
             }
 
-            // 5. Nitrogênio (IAC Tabela 2 Completa)
+            // Nitrogênio
             let recN = 0;
-            const highYield = data.yield > 100; // > 100 sc/ha (6t)
+            const highYield = data.yield > 100;
             const prevCulture = document.getElementById('prevCulture').value;
-            
             if(prevCulture === "milho") recN = highYield ? 80 : 60;
             else if(prevCulture === "graminea") recN = highYield ? 100 : 80;
             else recN = highYield ? 60 : 40;
 
-            // Ajuste Prático Alta Produtividade
-            if (data.yield > 100) {
-                let extraN = (data.yield - 100) * 1.2;
-                recN += extraN;
-            }
+            if (data.yield > 100) recN += (data.yield - 100) * 1.2;
 
-            // Ajuste Safrinha
             let warningSafra = "";
-            if(data.season === 'safrinha') {
-                recN *= 0.8; recK *= 0.8;
-                warningSafra = " (Redução de 20% aplicada para Safrinha)";
-            }
+            if(data.season === 'safrinha') { recN *= 0.8; recK *= 0.8; warningSafra = " (Ajuste Safrinha)"; }
 
-            // Fontes Comerciais
-            const map = recP / 0.52; // 52% P2O5
-            const kcl = recK / 0.60; // 60% K2O
-            const nFromMap = map * 0.11; // 11% N
-            const urea = Math.max(0, recN - nFromMap) / 0.45; // 45% N
-            const gessoTon = (data.clay * 50) / 1000; // NG = 50 * Argila
+            // Fontes
+            const map = recP/0.52, kcl = recK/0.60, nFromMap = map * 0.11;
+            const urea = Math.max(0, recN - nFromMap) / 0.45;
+            const gessoTon = (data.clay * 50) / 1000;
 
-            const dateStr = new Date().toLocaleDateString('pt-BR');
-            
-            // LAUDO TEXTUAL DETALHADO
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
-Data da Emissão: ${dateStr}
+Data da Emissão: ${new Date().toLocaleDateString()}
 ------------------------------------------------------------
 DADOS CADASTRAIS
 Produtor: ${data.owner}
@@ -641,7 +678,7 @@ B) ADUBAÇÃO DE COBERTURA
 4. MICRONUTRIENTES E ORGÂNICOS
    - Zinco (Zn): Recomenda-se 300-400 g/ha via foliar (V4-V6) ou 2 kg/ha via solo.
    - Boro (B): Recomenda-se 150-200 g/ha via foliar.
-   - Matéria Orgânica: Opcionalmente, pode-se usar 15-20 t/ha de esterco de curral ou 4-6 t/ha de cama de frango para melhoria da estrutura do solo.
+   - Matéria Orgânica: Opcionalmente, pode-se usar 15-20 t/ha de esterco de curral ou 4-6 t/ha de cama de frango.
 
 ------------------------------------------------------------
 Sistema de Recomendação Agronômica (SRA)
@@ -650,9 +687,7 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('resultsSection').style.display = 'block';
             document.getElementById('finalReportText').value = laudo.trim();
             
-            // Tabela Técnica
-            const tbody = document.getElementById('techTableBody');
-            tbody.innerHTML = `
+            document.getElementById('techTableBody').innerHTML = `
                 <tr><td>Nec. Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr>
                 <tr><td>Nec. Gesso</td><td>${gessoTon.toFixed(1)}</td><td>t/ha</td></tr>
                 <tr><td>N Total</td><td>${recN.toFixed(0)}</td><td>kg/ha</td></tr>
@@ -662,10 +697,9 @@ Sistema de Recomendação Agronômica (SRA)
                 <tr><td>Ureia Estimada</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>
                 <tr><td>KCl Estimado</td><td>${Math.round(kcl)}</td><td>kg/ha</td></tr>
             `;
-
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // Preencher dados do Export Oculto (DOC)
+            // Export DOC
             document.getElementById('doc_owner').innerText = data.owner;
             document.getElementById('doc_prop').innerText = data.prop;
             document.getElementById('doc_season').innerText = data.season.toUpperCase();
@@ -674,24 +708,12 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('doc_clay').innerText = data.clay;
             document.getElementById('doc_v').innerText = data.V.toFixed(1);
             document.getElementById('doc_body_content').innerText = laudo.substring(laudo.indexOf("2. CORREÇÃO"));
-            // Copiar tabela para o doc
-            document.getElementById('doc_table_container').innerHTML = `
-                <table class="doc-table">
-                    <thead><tr><th>Parâmetro</th><th>Valor Calculado</th><th>Unidade</th></tr></thead>
-                    <tbody>${tbody.innerHTML}</tbody>
-                </table>
-            `;
+            document.getElementById('doc_table_container').innerHTML = `<table class="doc-table"><thead><tr><th>Item</th><th>Valor</th><th>Unid</th></tr></thead><tbody>${document.getElementById('techTableBody').innerHTML}</tbody></table>`;
 
-            // GRAVAÇÃO HÍBRIDA
-            const reportObj = { date: new Date().toISOString(), owner: data.owner, result: laudo };
-            
-            // 1. Nuvem
+            const rObj = { date: new Date().toISOString(), owner: data.owner, result: laudo };
             if (isReal && document.getElementById('checkSaveCloud').checked && auth.currentUser) {
-                try {
-                    await addDoc(collection(db, "users", auth.currentUser.uid, "reports"), { ...reportObj, timestamp: serverTimestamp() });
-                } catch(e) { console.error(e); }
+                try { await addDoc(collection(db, "users", auth.currentUser.uid, "reports"), { ...reportObj, timestamp: serverTimestamp() }); } catch(e) { console.error(e); }
             }
-            // 2. Local
             if (document.getElementById('checkSaveLocal').checked) {
                 const hist = JSON.parse(localStorage.getItem('sra_local_history')) || [];
                 hist.unshift(reportObj);
@@ -709,9 +731,8 @@ Sistema de Recomendação Agronômica (SRA)
             else d.forEach(i=>{ const x=document.createElement('div'); x.className="list-group-item list-group-item-action"; x.innerHTML=`<b>${i.owner}</b> <small>${new Date(i.date).toLocaleDateString()}</small>`; x.onclick=()=>{document.getElementById('finalReportText').value=i.result; document.getElementById('resultsSection').style.display='block'; bootstrap.Modal.getInstance(document.getElementById('historyModal')).hide();}; l.appendChild(x); });
             new bootstrap.Modal(document.getElementById('historyModal')).show();
         };
-        window.clearLocalHistory=()=>{ if(confirm("Apagar histórico local?")){localStorage.removeItem('sra_local_history'); window.openHistoryModal();} };
+        window.clearLocalHistory=()=>{ if(confirm("Apagar?")){localStorage.removeItem('sra_local_history'); window.openHistoryModal();} };
 
-        // Export DOCX (.docx real)
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
             const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:'Calibri',sans-serif;font-size:11pt} h1{color:#2e7d32;font-size:16pt;margin-bottom:5px} p{margin-bottom:10px} table{width:100%;border-collapse:collapse;margin-top:15px} th,td{border:1px solid #ccc;padding:5px;text-align:center} th{background-color:#f2f2f2}</style></head><body>${content}</body></html>`;
@@ -723,29 +744,15 @@ Sistema de Recomendação Agronômica (SRA)
             } else { alert("Erro ao carregar biblioteca DOCX. Verifique a internet."); }
         };
 
-        // Export PDF (CORRIGIDO: Clone Visível)
         window.downloadPDF = () => {
             const source = document.getElementById('exportContent');
             const owner = document.getElementById('ownerName').value || "SRA";
-            
-            // 1. Clona o conteúdo oculto
             const element = source.cloneNode(true);
-            
-            // 2. Torna visível e formata para A4
-            element.style.display = 'block';
-            element.style.width = '210mm';
-            element.style.padding = '20mm';
-            element.style.backgroundColor = 'white';
-            element.style.position = 'absolute';
-            element.style.top = '0';
-            element.style.left = '0';
-            element.style.zIndex = '99999';
-            
+            element.classList.add('pdf-visible-clone');
             document.body.appendChild(element);
 
-            // 3. Gera PDF
             const opt = {
-                margin: 0,
+                margin: 10,
                 filename: `Laudo_${owner}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
@@ -756,22 +763,6 @@ Sistema de Recomendação Agronômica (SRA)
                 document.body.removeChild(element);
             });
         };
-
-        // --- ENVIAR EMAIL (CORREÇÃO DE LINK LONGO) ---
-        window.shareEmail = () => {
-            const text = document.getElementById('finalReportText').value;
-            const owner = document.getElementById('ownerName').value || "Produtor";
-            const subject = `Laudo Técnico - ${owner}`;
-            
-            if (encodeURIComponent(text).length > 1800) {
-                alert("O laudo é muito extenso para o link direto.\n\nO texto foi copiado para a Área de Transferência.\nPor favor, cole (Ctrl+V) no corpo do e-mail.");
-                navigator.clipboard.writeText(text);
-                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`;
-            } else {
-                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
-            }
-        };
-
     </script>
 </body>
 </html>
