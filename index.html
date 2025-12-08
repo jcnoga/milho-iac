@@ -879,12 +879,11 @@ window.downloadWord = () => {
 };
 
         // EXPORTAR PDF (JANELA DE IMPRESSÃO)
-// ROTINA HÍBRIDA: BAIXA DOCX E ABRE PDF
+// ROTINA EXCLUSIVA: APENAS ABRIR IMPRESSÃO/PDF
         window.printPDF = () => {
             const content = document.getElementById('exportContent').innerHTML;
-            const owner = document.getElementById('ownerName').value || 'SRA';
 
-            // Estilos compartilhados para garantir que o Word e o PDF fiquem iguais
+            // Estilos para garantir que a impressão saia formatada corretamente
             const styles = `
                 body { font-family: 'Arial', sans-serif; font-size: 11pt; color: #000; }
                 .doc-header { border-bottom: 2px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
@@ -905,41 +904,23 @@ window.downloadWord = () => {
                 .doc-footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 9pt; color: #777; }
             `;
 
-            // 1. PASSO: GERAR E BAIXAR O DOCX (WORD)
-            const htmlForWord = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${styles}</style></head><body>${content}</body></html>`;
+            // Abre a janela de impressão imediatamente
+            const printWindow = window.open('', '', 'height=700,width=900');
             
-            if (typeof htmlDocx !== 'undefined') {
-                const converted = htmlDocx.asBlob(htmlForWord);
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(converted);
-                link.download = `Laudo_${owner}.docx`;
-                document.body.appendChild(link);
-                link.click(); // Força o download do Word
-                document.body.removeChild(link);
-            } else {
-                console.warn("Biblioteca html-docx não carregada. Apenas PDF será gerado.");
-            }
-
-            // 2. PASSO: ABRIR JANELA PARA SALVAR COMO PDF (com delay pequeno para não travar o download)
-            setTimeout(() => {
-                const printWindow = window.open('', '', 'height=700,width=900');
-                printWindow.document.write('<html><head><title>Laudo Agronômico</title>');
-                printWindow.document.write(`<style>${styles}</style>`); // Usa os mesmos estilos
-                printWindow.document.write('</head><body>');
-                printWindow.document.write(content);
-                printWindow.document.write('</body></html>');
-                
-                printWindow.document.close();
-                printWindow.focus();
-                
-                // Aguarda renderização e abre diálogo de impressão
-                setTimeout(() => { 
-                    printWindow.print(); 
-                    // printWindow.close(); // Descomente se quiser fechar a janela automaticamente após imprimir
-                }, 500);
-            }, 1000);
+            printWindow.document.write('<html><head><title>Laudo Agronômico</title>');
+            printWindow.document.write(`<style>${styles}</style>`); 
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Aguarda um breve momento para renderizar os estilos e abre o diálogo
+            setTimeout(() => { 
+                printWindow.print(); 
+            }, 500);
         };
-
     </script>
 </body>
 </html>
