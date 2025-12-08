@@ -90,6 +90,7 @@
         #exportContent { display: none; }
         .doc-header { border-bottom: 3px solid #1b5e20; margin-bottom: 20px; padding-bottom: 10px; }
         .doc-title { font-size: 22px; font-weight: bold; color: #1b5e20; margin: 0; }
+        .doc-subtitle { font-size: 11px; color: #555; }
         .doc-section-title { 
             background-color: #e8f5e9; color: #1b5e20; padding: 5px; 
             font-weight: bold; font-size: 12px; margin-top: 15px; border-left: 5px solid #1b5e20; 
@@ -130,7 +131,10 @@
             <div class="mb-3"><label>Nome Completo</label><input type="text" id="regName" class="form-control"></div>
             <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
             <div class="mb-4"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
-            <div class="d-grid gap-2"><button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary fw-bold" id="btnRegAction">CADASTRAR</button>
+                <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
+            </div>
         </div>
 
         <!-- Recuperar Senha -->
@@ -144,7 +148,7 @@
         <div id="tokenForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold text-primary mb-2">Créditos</h4>
             <div class="bg-light p-3 rounded text-center mb-4 border"><h1 class="text-dark m-0" id="displayAuthCode">----</h1></div>
-            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center" placeholder="Senha"></div>
+            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center" form-control-lg" placeholder="Senha"></div>
             <div class="d-grid gap-2"><button class="btn btn-success fw-bold" id="btnTokenAction">VALIDAR</button><button class="btn btn-link text-danger" onclick="startUnauthorized()">Modo Demonstração</button></div>
         </div>
     </div>
@@ -242,7 +246,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. Física -->
+                    <!-- 4. Física e Micronutrientes -->
                     <div class="mb-4">
                         <h5 class="form-section-title">4. Física e Micronutrientes</h5>
                         <div class="row g-2">
@@ -397,6 +401,7 @@
         window.calculateComplex = () => {
             const get = id => parseFloat(document.getElementById(id).value)||0;
             const K = get('soilK'); const Ca = get('soilCa'); const Mg = get('soilMg'); 
+            const Na = get('soilNa'); 
             const HAl = get('soilHAl'); // Acidez Potencial
 
             const SB = Ca + Mg + K;
@@ -405,6 +410,7 @@
 
             document.getElementById('soilCTC').value = CTC.toFixed(2);
             document.getElementById('soilV').value = V.toFixed(1);
+            document.getElementById('soilSB').value = SB.toFixed(2);
         };
 
         // --- FUNÇÃO PREENCHER TESTE (CORRIGIDA) ---
@@ -521,26 +527,44 @@
             // 3. Fósforo (IAC Tabela 1 Completa)
             let recP = 0;
             if(texClass === "Arenosa") {
-                if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
+                if(data.P <= 10) recP = 80;
+                else if(data.P <= 20) recP = 60;
+                else if(data.P <= 30) recP = 40;
+                else recP = 20;
             } else if(texClass === "Média") {
-                if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
+                if(data.P <= 10) recP = 100;
+                else if(data.P <= 20) recP = 80;
+                else if(data.P <= 30) recP = 60;
+                else recP = 40;
             } else { // Argilosa
-                if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
+                if(data.P <= 10) recP = 120;
+                else if(data.P <= 20) recP = 100;
+                else if(data.P <= 30) recP = 80;
+                else recP = 60;
             }
 
             // 4. Potássio (IAC Tabela 1 Completa - K em mmolc)
             let recK = 0;
             if(texClass === "Arenosa") {
-                if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
+                if(data.K <= 0.8) recK = 80;
+                else if(data.K <= 1.5) recK = 60;
+                else if(data.K <= 2.5) recK = 40;
+                else recK = 20;
             } else if(texClass === "Média") {
-                if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
+                if(data.K <= 1.0) recK = 100;
+                else if(data.K <= 2.0) recK = 80;
+                else if(data.K <= 3.5) recK = 60;
+                else recK = 40;
             } else { // Argilosa
-                if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
+                if(data.K <= 1.2) recK = 120;
+                else if(data.K <= 2.5) recK = 100;
+                else if(data.K <= 4.5) recK = 80;
+                else recK = 60;
             }
 
             // 5. Nitrogênio (IAC Tabela 2 Completa)
             let recN = 0;
-            const highYield = data.yield > 100;
+            const highYield = data.yield > 100; // > 100 sc/ha (6t)
             const prevCulture = document.getElementById('prevCulture').value;
             
             if(prevCulture === "milho") recN = highYield ? 80 : 60;
@@ -731,6 +755,21 @@ Sistema de Recomendação Agronômica (SRA)
             html2pdf().set(opt).from(element).save().then(() => {
                 document.body.removeChild(element);
             });
+        };
+
+        // --- ENVIAR EMAIL (CORREÇÃO DE LINK LONGO) ---
+        window.shareEmail = () => {
+            const text = document.getElementById('finalReportText').value;
+            const owner = document.getElementById('ownerName').value || "Produtor";
+            const subject = `Laudo Técnico - ${owner}`;
+            
+            if (encodeURIComponent(text).length > 1800) {
+                alert("O laudo é muito extenso para o link direto.\n\nO texto foi copiado para a Área de Transferência.\nPor favor, cole (Ctrl+V) no corpo do e-mail.");
+                navigator.clipboard.writeText(text);
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}`;
+            } else {
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+            }
         };
 
     </script>
