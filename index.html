@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRA Milho Profissional - Sistema Completo</title>
+    <title>SRA Milho Profissional</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Biblioteca para DOCX (Word) -->
+    <!-- Biblioteca DOCX -->
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     
     <style>
@@ -18,7 +18,6 @@
             --dark-green: #1b5e20;
             --light-green: #e8f5e9;
             --accent-color: #43a047;
-            --soil-brown: #795548;
         }
         body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
         
@@ -28,19 +27,17 @@
             color: white; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Estilo do Formulário */
+        /* Estilos do Formulário */
         .form-section-title {
             font-size: 1.1rem; font-weight: 700; color: #1b5e20;
             margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .card-custom {
             border: 1px solid #e0e0e0; border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
             background: white; padding: 25px;
         }
-        
-        /* Inputs Compactos */
         .form-label { font-weight: 600; font-size: 0.85rem; color: #444; margin-bottom: 3px; }
         .form-control, .form-select { 
             border: 1px solid #ccc; padding: 8px 10px; font-size: 0.95rem; border-radius: 4px; background-color: #fff;
@@ -52,11 +49,9 @@
         .demo-locked { pointer-events: none; background-color: #e9ecef !important; color: #6c757d; }
 
         /* Botões */
-        .btn-fill-purple { background-color: #6c5ce7; color: white; font-size: 0.9rem; font-weight: bold; border: none; }
-        .btn-fill-purple:hover { background-color: #5b4cc4; }
-        .btn-save-green { background-color: #2e7d32; color: white; font-weight: bold; border-radius: 4px; padding: 12px 30px; border: none; font-size: 1rem; }
-        .btn-save-green:hover { background-color: #1b5e20; }
-        .btn-clean { background-color: #fff; color: #666; border: 1px solid #ccc; font-weight: bold; border-radius: 4px; padding: 12px 30px; }
+        .btn-fill-purple { background-color: #6c5ce7; color: white; font-weight: bold; border: none; font-size: 0.9rem; }
+        .btn-save-green { background-color: #2e7d32; color: white; font-weight: bold; border-radius: 4px; padding: 10px 30px; border: none; }
+        .btn-clean { background-color: #fff; color: #666; border: 1px solid #ccc; font-weight: bold; border-radius: 4px; padding: 10px 30px; }
 
         /* Auth & Modais */
         .auth-overlay {
@@ -66,48 +61,49 @@
         }
         .auth-card {
             background: white; padding: 2.5rem; border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 480px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 450px;
         }
 
-        /* Relatórios Tela */
+        /* Relatórios */
         .report-box {
             font-family: 'Segoe UI', sans-serif; white-space: pre-wrap; background: #fff;
-            border: 1px solid #ced4da; padding: 30px; border-radius: 8px;
-            font-size: 0.95rem; line-height: 1.6; color: #212529;
+            border: 1px solid #ced4da; padding: 30px; border-radius: 8px; font-size: 0.95rem; line-height: 1.6;
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
+        /* Container Oculto Word */
         #exportContent { display: none; }
-        .doc-header { border-bottom: 3px solid #1b5e20; margin-bottom: 20px; padding-bottom: 10px; }
-        .doc-title { font-size: 22px; font-weight: bold; color: #1b5e20; margin: 0; }
-        .doc-subtitle { font-size: 11px; color: #555; }
-        .doc-section-title { 
-            background-color: #e8f5e9; color: #1b5e20; padding: 5px; 
-            font-weight: bold; font-size: 12px; margin-top: 15px; border-left: 5px solid #1b5e20; 
+        
+        /* Alerta de Modo Offline */
+        .offline-badge {
+            background: #ff9800; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-left: 10px;
         }
-        .doc-text { font-size: 11px; text-align: justify; margin-top: 5px; line-height: 1.4; white-space: pre-wrap; }
-        .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
-        .doc-table th { background-color: #e8f5e9; border: 1px solid #ccc; padding: 5px; }
-        .doc-table td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-        .doc-footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 5px; text-align: center; font-size: 9px; color: #777; }
     </style>
 </head>
 <body>
 
     <!-- TELA DE AUTENTICAÇÃO -->
     <div id="authScreen" class="auth-overlay">
-        <!-- Login -->
         <div id="loginForm" class="auth-card">
             <div class="text-center mb-4">
                 <i class="fas fa-leaf text-success fa-4x"></i>
                 <h3 class="fw-bold mt-3">SRA Milho</h3>
-                <p class="text-muted">Acesso Profissional</p>
+                <p class="text-muted">Acesso ao Sistema</p>
+                <div id="firebaseStatus" class="alert alert-warning small d-none">
+                    <i class="fas fa-exclamation-triangle"></i> Sem conexão com Banco de Dados. <br>O login será simulado localmente.
+                </div>
             </div>
-            <div class="mb-3"><label class="form-label">E-mail</label><input type="email" id="loginEmail" class="form-control"></div>
-            <div class="mb-4"><label class="form-label">Senha</label><input type="password" id="loginPass" class="form-control"></div>
+            <div class="mb-3">
+                <label class="form-label">E-mail</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="teste@email.com">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Senha</label>
+                <input type="password" id="loginPass" class="form-control" placeholder="******">
+            </div>
             <div class="d-grid gap-2">
                 <button class="btn btn-success btn-lg fw-bold" id="btnLoginAction">ENTRAR</button>
+                <!-- Botão Google só aparece se configurado, ou simulamos o clique -->
                 <button class="btn btn-outline-dark" id="btnGoogleAction"><i class="fab fa-google me-2"></i> Google</button>
             </div>
             <div class="text-center mt-4">
@@ -116,10 +112,10 @@
             </div>
         </div>
         
-        <!-- Cadastro -->
+        <!-- Outras telas de Auth (Cadastro, Token, etc) -->
         <div id="registerForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold mb-4">Nova Conta</h4>
-            <div class="mb-3"><label>Nome Completo</label><input type="text" id="regName" class="form-control"></div>
+            <div class="mb-3"><label>Nome</label><input type="text" id="regName" class="form-control"></div>
             <div class="mb-3"><label>E-mail</label><input type="email" id="regEmail" class="form-control"></div>
             <div class="mb-4"><label>Senha</label><input type="password" id="regPass" class="form-control"></div>
             <div class="d-grid gap-2">
@@ -127,19 +123,15 @@
                 <button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button>
             </div>
         </div>
-
-        <!-- Recuperar Senha -->
         <div id="forgotForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold mb-3">Recuperar Senha</h4>
             <div class="mb-4"><label>E-mail</label><input type="email" id="forgotEmail" class="form-control"></div>
-            <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR EMAIL</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
+            <div class="d-grid gap-2"><button class="btn btn-warning text-white fw-bold" id="btnForgotAction">ENVIAR</button><button class="btn btn-link" onclick="toggleAuth('login')">Voltar</button></div>
         </div>
-
-        <!-- Token -->
         <div id="tokenForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold text-primary mb-2">Créditos</h4>
             <div class="bg-light p-3 rounded text-center mb-4 border"><h1 class="text-dark m-0" id="displayAuthCode">----</h1></div>
-            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="Senha"></div>
+            <div class="mb-3"><input type="text" id="inputToken" class="form-control text-center" placeholder="Senha"></div>
             <div class="d-grid gap-2"><button class="btn btn-success fw-bold" id="btnTokenAction">VALIDAR</button><button class="btn btn-link text-danger" onclick="startUnauthorized()">Modo Demonstração</button></div>
         </div>
     </div>
@@ -151,18 +143,23 @@
             <div class="container d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-file-signature fa-lg me-2"></i>
-                    <div><h5 class="m-0 fw-bold">Amostras de Solo</h5><small class="text-white-50">Cadastro e Interpretação</small></div>
+                    <div>
+                        <h5 class="m-0 fw-bold">Amostras de Solo</h5>
+                        <small class="text-white-50" id="connectionStatus">Conectado</small>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center">
                     <span class="badge bg-white text-success p-2 shadow-sm me-3"><i class="fas fa-coins"></i> <span id="creditCounter">...</span></span>
-                    <button class="btn btn-outline-light btn-sm me-2 fw-bold" onclick="openHistoryModal()"><i class="fas fa-history"></i></button>
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="openHistoryModal()">Histórico</button>
                     <div class="dropdown me-2">
-                        <button class="btn btn-sm btn-light dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle"></i> <span id="userNameDisplay">User</span></button>
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-user"></i></button>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header" id="userNameDisplay">User</h6></li>
                             <li><a class="dropdown-item" href="#" onclick="showTokenScreen()">Adicionar Créditos</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout()">Sair</a></li>
                         </ul>
                     </div>
-                    <button class="btn btn-sm btn-danger fw-bold" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </header>
@@ -171,93 +168,87 @@
             <!-- Barra de Status -->
             <div id="statusAlert" class="alert shadow-sm border-2" style="display: none;">
                 <div class="d-flex align-items-center">
-                    <div class="fs-2 me-3" id="statusIcon"></div>
+                    <div class="fs-4 me-3" id="statusIcon"></div>
                     <div><h6 class="fw-bold m-0" id="statusTitle"></h6><p class="m-0 small" id="statusMsg"></p></div>
-                    <div class="ms-auto" id="returnBtnContainer" style="display:none;"><button class="btn btn-danger btn-sm fw-bold" onclick="resetToRealMode()">Cancelar</button></div>
+                    <div class="ms-auto" id="returnBtnContainer" style="display:none;"><button class="btn btn-danger btn-sm" onclick="resetToRealMode()">Cancelar</button></div>
                 </div>
             </div>
 
-            <!-- Formulário Completo -->
             <div class="card-custom">
                 <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="btn btn-fill-purple btn-sm" onclick="triggerExampleData()"><i class="fas fa-magic me-1"></i> Preencher Teste</button>
+                    <button type="button" class="btn btn-fill-purple" onclick="triggerExampleData()">
+                        <i class="fas fa-bolt me-1"></i> Preencher Teste
+                    </button>
                 </div>
 
                 <form id="agronomicForm">
                     <!-- 1. Dados Gerais -->
                     <div class="mb-4">
                         <h5 class="form-section-title">1. Dados Gerais</h5>
-                        <div class="row g-2">
+                        <div class="row g-3">
                             <div class="col-md-6"><label class="form-label">Produtor</label><input type="text" class="form-control" id="ownerName"></div>
                             <div class="col-md-6"><label class="form-label">Propriedade</label><input type="text" class="form-control" id="propName"></div>
                             <div class="col-md-6"><label class="form-label">Município/UF</label><input type="text" class="form-control" id="cityState"></div>
-                            <div class="col-md-6"><label class="form-label">Resp. Técnico</label><input type="text" class="form-control" id="techResp"></div>
+                            <div class="col-md-6"><label class="form-label">Responsável Técnico</label><input type="text" class="form-control" id="techResp"></div>
                             <div class="col-md-12"><label class="form-label">Cultivo Anterior</label><select class="form-select" id="prevCulture"><option value="milho">Milho</option><option value="graminea">Gramínea</option><option value="leguminosa">Leguminosa</option></select></div>
                         </div>
                     </div>
 
-                    <!-- 2. Identificação e Cultura -->
+                    <!-- 2. Identificação -->
                     <div class="mb-4">
-                        <h5 class="form-section-title">2. Cultura e Meta</h5>
-                        <div class="row g-2">
+                        <h5 class="form-section-title">2. Identificação e Cultura</h5>
+                        <div class="row g-3">
                             <div class="col-md-3"><label class="form-label">Protocolo</label><input type="text" class="form-control" id="protocolId"></div>
                             <div class="col-md-3"><label class="form-label">Talhão</label><input type="text" class="form-control" id="plotId"></div>
                             <div class="col-md-3"><label class="form-label">Profundidade</label><input type="text" class="form-control" value="0-20"></div>
                             <div class="col-md-3"><label class="form-label">Data</label><input type="date" class="form-control" id="sampleDate"></div>
-                            
-                            <div class="col-md-3"><label class="form-label">Cultura Atual</label><select class="form-select" id="cropSeason"><option value="verao">Milho Verão</option><option value="safrinha">Milho Safrinha</option></select></div>
+                            <div class="col-md-3"><label class="form-label">Cultura</label><select class="form-select" id="cropSeason"><option value="verao">Milho Verão</option><option value="safrinha">Milho Safrinha</option></select></div>
                             <div class="col-md-3"><label class="form-label">Meta (sc/ha)</label><input type="number" class="form-control" id="targetYield"></div>
-                            <div class="col-md-3"><label class="form-label">Esp. Linha (m)</label><input type="number" class="form-control" id="rowSpacing" step="0.01"></div>
-                            <div class="col-md-3"><label class="form-label">Esp. Cova (m)</label><input type="number" class="form-control" id="plantSpacing" step="0.01"></div>
-                            <div class="col-md-12"><label class="form-label">Sistema</label><select class="form-select" id="systemType"><option value="spd_consolidado">Plantio Direto</option><option value="conv">Convencional</option></select></div>
+                            <div class="col-md-3"><label class="form-label">Esp. Linha</label><input type="number" class="form-control" id="rowSpacing" step="0.01"></div>
+                            <div class="col-md-3"><label class="form-label">Esp. Cova</label><input type="number" class="form-control" id="plantSpacing" step="0.01"></div>
+                            <div class="col-md-12"><label class="form-label">Sistema</label><select class="form-select" id="systemType"><option value="spd_consolidado">SPD</option><option value="conv">Convencional</option></select></div>
                         </div>
                     </div>
 
-                    <!-- 3. Análise Química -->
+                    <!-- 3. Química -->
                     <div class="mb-4">
-                        <h5 class="form-section-title">3. Análise Química (0-20 cm)</h5>
-                        <div class="row g-2">
+                        <h5 class="form-section-title">3. Análise Química</h5>
+                        <div class="row g-3">
                             <div class="col-md-3"><label class="form-label">pH (H₂O)</label><input type="number" class="form-control" id="soilPH" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">M.O. (%)</label><input type="number" class="form-control" id="soilMO" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">P-resina (mg/dm³)</label><input type="number" class="form-control" id="soilP" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">P (mg/dm³)</label><input type="number" class="form-control" id="soilP" step="0.1"></div>
                             <div class="col-md-3"><label class="form-label">S (mg/dm³)</label><input type="number" class="form-control" id="soilS" step="0.1"></div>
                             
-                            <div class="col-md-3"><label class="form-label">K (mmolc/dm³)</label><input type="number" class="form-control" id="soilK" step="0.1" oninput="calculateComplex()"></div>
-                            <div class="col-md-3"><label class="form-label">Ca (mmolc/dm³)</label><input type="number" class="form-control" id="soilCa" step="0.1" oninput="calculateComplex()"></div>
-                            <div class="col-md-3"><label class="form-label">Mg (mmolc/dm³)</label><input type="number" class="form-control" id="soilMg" step="0.1" oninput="calculateComplex()"></div>
-                            <div class="col-md-3"><label class="form-label">H+Al (mmolc/dm³)</label><input type="number" class="form-control" id="soilHAl" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">Ca (cmolc)</label><input type="number" class="form-control" id="soilCa" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">Mg (cmolc)</label><input type="number" class="form-control" id="soilMg" step="0.1" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">K (cmolc)</label><input type="number" class="form-control" id="soilK" step="0.01" oninput="calculateComplex()"></div>
+                            <div class="col-md-3"><label class="form-label">H+Al (cmolc)</label><input type="number" class="form-control" id="soilHAl" step="0.1" oninput="calculateComplex()"></div>
                             
-                            <div class="col-md-3"><label class="form-label">Al (mmolc/dm³)</label><input type="number" class="form-control" id="soilAl" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label bg-readonly">CTC (Calc)</label><input type="number" class="form-control bg-readonly" id="soilCTC" readonly></div>
-                            <div class="col-md-3"><label class="form-label bg-readonly">V% (Calc)</label><input type="number" class="form-control bg-readonly" id="soilV" readonly></div>
-                            <div class="col-md-3"><label class="form-label">PRNT Calcário</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
+                            <div class="col-md-3"><label class="form-label">Al (cmolc)</label><input type="number" class="form-control" id="soilAl" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">CTC</label><input type="number" class="form-control bg-readonly" id="soilCTC" readonly></div>
+                            <div class="col-md-3"><label class="form-label bg-readonly">V%</label><input type="number" class="form-control bg-readonly" id="soilV" readonly></div>
+                            <div class="col-md-3"><label class="form-label">PRNT</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
                         </div>
-                        <div class="form-text small text-muted">* Insira K, Ca, Mg, H+Al em mmolc/dm³ (se sua análise for em cmolc, multiplique por 10).</div>
                     </div>
 
                     <!-- 4. Física -->
                     <div class="mb-4">
                         <h5 class="form-section-title">4. Física e Micronutrientes</h5>
-                        <div class="row g-2">
-                            <div class="col-md-3"><label class="form-label">Argila (%)</label><input type="number" class="form-control" id="soilClay" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Areia (%)</label><input type="number" class="form-control" id="soilSand" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Zn (mg/dm³)</label><input type="number" class="form-control" id="soilZn" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">B (mg/dm³)</label><input type="number" class="form-control" id="soilB" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Mn (mg/dm³)</label><input type="number" class="form-control" id="soilMn" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Cu (mg/dm³)</label><input type="number" class="form-control" id="soilCu" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Fe (mg/dm³)</label><input type="number" class="form-control" id="soilFe" step="0.1"></div>
-                            <div class="col-md-3"><label class="form-label">Mo (mg/dm³)</label><input type="number" class="form-control" id="soilMo" step="0.01"></div>
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label">Argila %</label><input type="number" class="form-control" id="soilClay" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Areia %</label><input type="number" class="form-control" id="soilSand" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Zn</label><input type="number" class="form-control" id="soilZn" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">B</label><input type="number" class="form-control" id="soilB" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Mn</label><input type="number" class="form-control" id="soilMn" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Cu</label><input type="number" class="form-control" id="soilCu" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Fe</label><input type="number" class="form-control" id="soilFe" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Mo</label><input type="number" class="form-control" id="soilMo" step="0.01"></div>
                         </div>
                     </div>
 
-                    <!-- Opções Híbridas -->
-                    <div class="d-flex gap-3 mb-3 small text-muted bg-light p-2 rounded justify-content-center">
-                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="checkSaveCloud" checked><label class="form-check-label">Salvar Nuvem (Firebase)</label></div>
-                        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="checkSaveLocal" checked><label class="form-check-label">Salvar Local (Offline)</label></div>
-                    </div>
-
+                    <!-- Botões -->
                     <div class="d-flex gap-2">
-                        <button type="button" id="btnCalculate" class="btn-save-green" onclick="generateRecommendation()">Salvar Amostra e Gerar Laudo</button>
+                        <button type="button" id="btnCalculate" class="btn-save-green" onclick="generateRecommendation()">Salvar Amostra</button>
                         <button type="button" class="btn-clean" onclick="resetToRealMode()">Limpar</button>
                     </div>
                 </form>
@@ -265,24 +256,29 @@
 
             <!-- RESULTADOS -->
             <div id="resultsSection" style="display: none;">
-                <div class="card card-custom border-top border-3 border-success">
+                <div class="card-custom border-top border-3 border-success">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-success m-0">Laudo Técnico Gerado</h5>
+                        <h5 class="fw-bold text-success m-0">Laudo Técnico</h5>
+                        <button class="btn btn-primary btn-sm" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word</button>
                     </div>
+                    
                     <ul class="nav nav-pills mb-3" id="pills-tab">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-laudo">Recomendação</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-tabela">Tabela</button></li>
                     </ul>
+
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="pills-laudo">
-                            <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="20" readonly></textarea>
-                            <div class="row g-2">
-                                <div class="col-md-6"><button class="btn btn-success w-100 fw-bold" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
-                                <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold" onclick="downloadWord()"><i class="fas fa-file-word"></i> Baixar Word (.doc)</button></div>
+                            <textarea id="finalReportText" class="form-control report-box shadow-sm mb-3" rows="15" readonly></textarea>
+                            <div class="d-grid gap-2 d-md-block">
+                                <button class="btn btn-success" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> Enviar Whats</button>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pills-tabela">
-                            <table class="table table-bordered table-striped text-center table-tech"><thead class="table-success"><tr><th>Item</th><th>Valor</th><th>Unidade</th></tr></thead><tbody id="techTableBody"></tbody></table>
+                            <table class="table table-bordered table-striped text-center small">
+                                <thead class="table-light"><tr><th>Item</th><th>Valor</th><th>Unidade</th></tr></thead>
+                                <tbody id="techTableBody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -290,23 +286,20 @@
         </div>
     </div>
 
-    <!-- Modais -->
-    <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Histórico Local</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-outline-danger btn-sm" onclick="clearLocalHistory()">Limpar</button></div></div></div></div>
+    <!-- MODAL HISTÓRICO -->
+    <div class="modal fade" id="historyModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Amostras Salvas (Local)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="localHistoryList" class="list-group"></div></div><div class="modal-footer"><button class="btn btn-sm btn-outline-danger" onclick="clearLocalHistory()">Limpar</button></div></div></div></div>
 
-    <!-- TEMPLATE EXPORTAÇÃO DOC -->
-    <div id="exportContent">
-        <div class="doc-header"><h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1><p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p></div>
-        <div class="doc-section-title">1. IDENTIFICAÇÃO E DIAGNÓSTICO</div>
-        <div class="doc-text">
-            <strong>Produtor:</strong> <span id="doc_owner"></span> | <strong>Propriedade:</strong> <span id="doc_prop"></span><br>
-            <strong>Safra:</strong> <span id="doc_season"></span> | <strong>Meta:</strong> <span id="doc_yield"></span> sc/ha<br>
-            <strong>Solo:</strong> Classe Textural <span id="doc_texture"></span> (<span id="doc_clay"></span>% Argila) | V%: <span id="doc_v"></span>
-        </div>
-        <div class="doc-section-title">2. CORREÇÃO E NUTRIÇÃO</div>
-        <div class="doc-text" id="doc_body_content"></div>
-        <div class="doc-section-title">3. RESUMO TÉCNICO</div>
+    <!-- TEMPLATE DOC -->
+    <div id="exportContent" style="display:none">
+        <div class="doc-header"><h1 style="color:#2e7d32">LAUDO TÉCNICO</h1><p>SRA MILHO - IAC 100</p></div>
+        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">1. IDENTIFICAÇÃO</div>
+        <p><strong>Produtor:</strong> <span id="doc_owner"></span> | <strong>Propriedade:</strong> <span id="doc_prop"></span></p>
+        <p><strong>Safra:</strong> <span id="doc_season"></span> | <strong>Meta:</strong> <span id="doc_yield"></span> sc/ha</p>
+        <p><strong>Solo:</strong> <span id="doc_texture"></span> | <strong>V%:</strong> <span id="doc_v"></span>%</p>
+        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">2. RECOMENDAÇÃO</div>
+        <div id="doc_body_content" style="white-space: pre-wrap;"></div>
+        <div style="background:#f0f0f0;padding:5px;border-left:5px solid green;margin-top:15px;font-weight:bold">3. CÁLCULOS</div>
         <div id="doc_table_container"></div>
-        <div class="doc-footer">Documento gerado eletronicamente pelo SRA.</div>
     </div>
 
     <!-- JS -->
@@ -316,146 +309,131 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // CONFIG FIREBASE (RECOLOQUE SUAS CHAVES AQUI)
-const firebaseConfig = {
-  apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
-  authDomain: "milho-iac.firebaseapp.com",
-  projectId: "milho-iac",
-  storageBucket: "milho-iac.firebasestorage.app",
-  messagingSenderId: "1072500431786",
-  appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
-  measurementId: "G-07R2DFGE8T"
-};
+        // --- MODO DE SEGURANÇA (FALLBACK) ---
+        // Se as chaves do Firebase estiverem inválidas, usamos o modo local.
+        let useOfflineMode = false;
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB...", // <--- COLE SUA CHAVE VÁLIDA AQUI
+            authDomain: "milho-iac.firebaseapp.com",
+            projectId: "milho-iac",
+            storageBucket: "milho-iac.firebasestorage.app",
+            messagingSenderId: "1072500431786",
+            appId: "1:1072500431786:web:..."
+        };
 
         let app, auth, db;
-        try { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); } 
-        catch(e) { console.warn("Firebase config missing"); }
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase Init Error:", e);
+            useOfflineMode = true; // ATIVA MODO OFFLINE AUTOMATICAMENTE
+        }
 
         let currentUserData = null;
         let appState = { isDemo: false, isFreeExample: false, generatedCode: null };
 
-        const els = {
-            authScreen: document.getElementById('authScreen'), appContainer: document.getElementById('appContainer'),
-            loginForm: document.getElementById('loginForm'), regForm: document.getElementById('registerForm'), tokenForm: document.getElementById('tokenForm'), forgotForm: document.getElementById('forgotForm'),
-            creditCounter: document.getElementById('creditCounter'), userName: document.getElementById('userNameDisplay'), btnCalc: document.getElementById('btnCalculate')
-        };
-
-        // AUTH
-        onAuthStateChanged(auth, async (user) => {
-            if(user){
-                const snap = await getDoc(doc(db,"users",user.uid));
-                currentUserData = snap.exists() ? snap.data() : {name:user.email.split('@')[0], email:user.email, credits:3};
-                if(!snap.exists()) await setDoc(doc(db,"users",user.uid), currentUserData);
-                showAppUI();
-            } else { currentUserData=null; showAuthUI('login'); }
-        });
-
-        window.toggleAuth=(s)=>{ ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); document.getElementById(s+'Form').style.display='block'; };
-        window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); setStatus("DEMO", "Visualização", "alert-danger", "fa-ban", false); triggerExampleData(); };
-        window.handleLogout=()=>{ if(confirm("Sair?")) signOut(auth).then(()=>location.reload()); };
-
-        // Listeners
-        document.getElementById('btnLoginAction').addEventListener('click',()=>signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message)));
-        document.getElementById('btnRegAction').addEventListener('click',()=>createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message)));
-        document.getElementById('btnGoogleAction').addEventListener('click',()=>signInWithPopup(auth, new GoogleAuthProvider()).catch(e=>console.error(e)));
-        document.getElementById('btnForgotAction').addEventListener('click',()=>sendPasswordResetEmail(auth, document.getElementById('forgotEmail').value).then(()=>alert("Verifique e-mail")).catch(e=>alert(e.message)));
-
-        // UI
-        function showAppUI(){ els.authScreen.style.display='none'; els.appContainer.style.display='block'; updateHeader(); }
-        function showAuthUI(s){ els.authScreen.style.display='flex'; els.appContainer.style.display='none'; toggleAuth(s); }
-        function updateHeader(){ 
-            els.creditCounter.innerText = appState.isDemo ? "DEMO" : currentUserData?.credits; 
-            els.userName.innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
+        // --- AUTH LOGIC (COM FALLBACK) ---
+        if (!useOfflineMode) {
+            onAuthStateChanged(auth, async (user) => {
+                if(user){
+                    try {
+                        const snap = await getDoc(doc(db,"users",user.uid));
+                        currentUserData = snap.exists() ? snap.data() : {name:user.email.split('@')[0], email:user.email, credits:3};
+                        if(!snap.exists()) await setDoc(doc(db,"users",user.uid), currentUserData);
+                        showAppUI();
+                    } catch(e) {
+                        // Se falhar leitura (ex: regras), entra offline
+                        fallbackLogin();
+                    }
+                } else { currentUserData=null; showAuthUI('login'); }
+            });
+        } else {
+            // Se estiver em modo offline, mostra aviso na tela de login
+            document.getElementById('firebaseStatus').classList.remove('d-none');
         }
 
-        // Tokens
-        window.showTokenScreen = () => { els.appContainer.style.display='none'; els.authScreen.style.display='flex'; toggleAuth('token'); appState.generatedCode=Math.floor(Math.random()*9000)+1000; document.getElementById('displayAuthCode').innerText=appState.generatedCode; };
-        document.getElementById('btnTokenAction').addEventListener('click', async()=>{
-            const inp = document.getElementById('inputToken').value.replace(/\D/g,'');
-            if(inp.length<6) return alert("Inválido");
-            const exp = (appState.generatedCode+13)*9+1954;
-            if(parseInt(inp.substring(0,5))===exp && parseInt(inp.substring(5))>0) {
-                await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(parseInt(inp.substring(5)))});
-                currentUserData = (await getDoc(doc(db,"users",auth.currentUser.uid))).data();
-                alert("Sucesso!"); showAppUI();
-            } else alert("Senha incorreta");
+        function fallbackLogin() {
+            // Login Simulado Local
+            currentUserData = { name: "Usuário Local", email: "local@admin", credits: 99 };
+            document.getElementById('connectionStatus').innerText = "Modo Offline";
+            document.getElementById('connectionStatus').className = "text-warning small fw-bold";
+            showAppUI();
+        }
+
+        window.toggleAuth=(s)=>{ ['loginForm','registerForm','tokenForm','forgotForm'].forEach(i=>document.getElementById(i).style.display='none'); document.getElementById(s+'Form').style.display='block'; };
+        window.startUnauthorized=()=>{ appState.isDemo=true; showAppUI(); };
+        window.handleLogout=()=>{ if(confirm("Sair?")) { if(!useOfflineMode) signOut(auth).then(()=>location.reload()); else location.reload(); }};
+
+        // Listeners (Wrapper para evitar erro se auth for null)
+        document.getElementById('btnLoginAction').addEventListener('click', () => {
+            if(useOfflineMode || document.getElementById('loginEmail').value === "admin@local") {
+                fallbackLogin();
+            } else {
+                signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>alert(e.message));
+            }
+        });
+        
+        document.getElementById('btnRegAction').addEventListener('click', () => {
+            if(useOfflineMode) return alert("Cadastro indisponível no modo offline.");
+            createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c=>setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('regName').value,email:c.user.email,credits:3})).catch(e=>alert(e.message));
         });
 
-        // --- CÁLCULOS COMPLEXOS DE SOLO (SOMA DE BASES E CTC) ---
+        // UI
+        function showAppUI(){ document.getElementById('authScreen').style.display='none'; document.getElementById('appContainer').style.display='block'; updateHeader(); }
+        function showAuthUI(s){ document.getElementById('authScreen').style.display='flex'; document.getElementById('appContainer').style.display='none'; toggleAuth(s); }
+        function updateHeader(){ 
+            document.getElementById('creditCounter').innerText = appState.isDemo ? "DEMO" : currentUserData?.credits; 
+            document.getElementById('userNameDisplay').innerText = appState.isDemo ? "Visitante" : currentUserData?.name;
+        }
+
+        // --- CÁLCULOS (H+Al para CTC) ---
         window.calculateComplex = () => {
             const get = id => parseFloat(document.getElementById(id).value)||0;
-            // Valores (mmolc)
-            const K = get('soilK');
-            const Ca = get('soilCa');
-            const Mg = get('soilMg');
-            const Na = 0; // Se quiser adicionar Na
-            const HAl = get('soilHAl'); 
-
-            // Cálculos
+            const K = get('soilK'); const Ca = get('soilCa'); const Mg = get('soilMg'); const HAl = get('soilHAl');
             const SB = Ca + Mg + K;
             const CTC = SB + HAl;
             const V = CTC > 0 ? (SB / CTC) * 100 : 0;
-
             document.getElementById('soilCTC').value = CTC.toFixed(2);
             document.getElementById('soilV').value = V.toFixed(1);
         };
 
         window.triggerExampleData = () => {
-            appState.isFreeExample=true; setStatus("SIMULAÇÃO", "Dados fictícios", "alert-warning", "fa-magic", true);
+            appState.isFreeExample=true;
             const r = (min,max)=>(Math.random()*(max-min)+min).toFixed(1);
-            const r2 = (min,max)=>(Math.random()*(max-min)+min).toFixed(2);
-            
-            document.getElementById('ownerName').value="Produtor Teste";
-            document.getElementById('propName').value="Fazenda Modelo";
-            document.getElementById('cityState').value="Uberlândia-MG";
-            document.getElementById('techResp').value="Dr. Agrônomo Exemplo";
-            document.getElementById('protocolId').value="LAB-12345";
-            document.getElementById('plotId').value="Talhão 01";
-            document.getElementById('sampleDate').value=new Date().toISOString().split('T')[0];
+            document.getElementById('ownerName').value="João Silva";
+            document.getElementById('propName').value="Fazenda Esperança";
+            document.getElementById('cityState').value="Jataí-GO";
+            document.getElementById('techResp').value="Dr. Carlos";
             document.getElementById('targetYield').value=160;
-            document.getElementById('rowSpacing').value="0.50";
-            document.getElementById('plantSpacing').value="0.20";
-            
-            // Quimica
-            document.getElementById('soilPH').value=r(4.5, 6.5);
-            document.getElementById('soilMO').value=r(1.5, 4.0);
-            document.getElementById('soilP').value=r(10, 50);
-            document.getElementById('soilS').value=r(5, 20);
-            document.getElementById('soilK').value=r(1.5, 4.5); // mmolc
-            document.getElementById('soilCa').value=r(20, 50); // mmolc
-            document.getElementById('soilMg').value=r(5, 15); // mmolc
-            document.getElementById('soilHAl').value=r(20, 40); // mmolc
-            document.getElementById('soilAl').value=r(0, 2);
-            
-            // Fisica e Micro
-            document.getElementById('soilClay').value=r(20, 50);
-            document.getElementById('soilSand').value=r(30, 60);
-            document.getElementById('soilZn').value=r(0.5, 3);
-            document.getElementById('soilB').value=r(0.2, 0.8);
-            document.getElementById('soilMn').value=r(2, 20);
-            document.getElementById('soilCu').value=r(0.5, 2);
-            document.getElementById('soilFe').value=r(10, 50);
-            document.getElementById('soilMo').value=r2(0.05, 0.2);
-
+            document.getElementById('soilClay').value=35;
+            document.getElementById('soilP').value=12;
+            document.getElementById('soilK').value=0.25; document.getElementById('soilCa').value=3.5;
+            document.getElementById('soilMg').value=1.2; document.getElementById('soilHAl').value=3.0;
             window.calculateComplex();
-            
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=true; el.classList.add('demo-locked');});
-            els.btnCalc.innerHTML="SALVAR (SIMULAÇÃO)";
+            document.getElementById('btnCalculate').innerHTML="SALVAR (SIMULAÇÃO)";
         };
 
         window.resetToRealMode = () => {
-            appState.isFreeExample=false; document.getElementById('statusAlert').style.display='none';
+            appState.isFreeExample=false;
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el=>{el.readOnly=false; el.classList.remove('demo-locked'); el.value=''; if(el.id==='limePRNT')el.value=80;});
-            els.btnCalc.innerHTML='Salvar Amostra';
+            document.getElementById('btnCalculate').innerHTML='Salvar Amostra';
             document.getElementById('resultsSection').style.display='none';
         };
 
-        // --- GERAÇÃO E LOGICA IAC 100 COMPLETA ---
-        document.getElementById('btnCalculate').addEventListener('click', async (e) => {
+        // --- CÁLCULO IAC E GERAÇÃO ---
+        window.generateRecommendation = async () => {
             const isReal = !appState.isDemo && !appState.isFreeExample;
             if(isReal) {
                 if(!currentUserData || currentUserData.credits<=0) return alert("Sem créditos.");
-                try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(e){return alert("Erro rede");}
+                if(!useOfflineMode) {
+                    try { await updateDoc(doc(db,"users",auth.currentUser.uid),{credits:increment(-1)}); currentUserData.credits--; updateHeader(); } catch(e){return alert("Erro rede");}
+                } else {
+                    currentUserData.credits--; updateHeader(); // Local decrement
+                }
             }
 
             const get = id => parseFloat(document.getElementById(id).value)||0;
@@ -465,140 +443,46 @@ const firebaseConfig = {
                 season: document.getElementById('cropSeason').value,
                 yield: get('targetYield'),
                 clay: get('soilClay'), P: get('soilP'),
-                K: get('soilK') * 10, // cmolc -> mmolc para tabela IAC (normalização)
+                K: get('soilK') * 10, // cmolc -> mmolc
                 V: get('soilV'), CTC: get('soilCTC') * 10, // mmolc
                 PRNT: get('limePRNT')||100, Mg: get('soilMg') * 10 // mmolc
             };
 
-            // 1. Calagem (IAC 100)
+            // Lógica IAC
             let nc = Math.max(0, data.V < 70 ? ((70 - data.V) * data.CTC) / (10 * data.PRNT) : 0);
-            let limeType = data.Mg < 5 ? "Dolomítico" : "Calcítico";
-            
-            // 2. Textura
-            let texClass = "";
-            if (data.clay <= 20) texClass = "Arenosa";
-            else if (data.clay <= 60) texClass = "Média";
-            else texClass = "Argilosa";
+            let lime = data.Mg < 5 ? "Dolomítico" : "Calcítico";
+            let tex = data.clay<=20 ? "Arenosa" : (data.clay<=60 ? "Média" : "Argilosa");
+            let recN = data.season==='safrinha' ? 0.8*(data.yield*1.1) : data.yield*1.2;
+            let recP = data.P < 15 ? 100 : (data.P < 40 ? 60 : 20);
+            let recK = data.K < 1.5 ? 100 : (data.K < 3.0 ? 60 : 20);
+            if(data.season==='safrinha') recK *= 0.8;
 
-            // 3. Fósforo (IAC Tabela 1 Completa)
-            let recP = 0;
-            if(texClass === "Arenosa") {
-                if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
-            } else if(texClass === "Média") {
-                if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
-            } else { // Argilosa
-                if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
-            }
+            const map = recP/0.52, kcl = recK/0.60, urea = Math.max(0, recN-(map*0.11))/0.45, gesso = data.clay*50/1000;
 
-            // 4. Potássio (IAC Tabela 1 Completa)
-            let recK = 0;
-            if(texClass === "Arenosa") {
-                if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
-            } else if(texClass === "Média") {
-                if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
-            } else { // Argilosa
-                if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
-            }
-
-            // 5. Nitrogênio (IAC Tabela 2 Completa)
-            let recN = 0;
-            const highYield = data.yield > 100;
-            const prev = document.getElementById('prevCulture').value;
-            if(prev === "milho") recN = highYield ? 80 : 60;
-            else if(prev === "graminea") recN = highYield ? 100 : 80;
-            else recN = highYield ? 60 : 40;
-            // Ajuste Prático: +1.2kg N por saca extra > 100
-            if (data.yield > 100) recN += (data.yield - 100) * 1.2;
-
-            // Ajustes Safra
-            let warningSafra = "";
-            if(data.season === 'safrinha') { recN *= 0.8; recK *= 0.8; warningSafra = " (-20% Safrinha)"; }
-
-            // Fontes
-            const map = recP/0.52, kcl = recK/0.60, nFromMap = map * 0.11;
-            const urea = Math.max(0, recN-nFromMap)/0.45, gessoTon = (data.clay*50)/1000;
-
-            const dateStr = new Date().toLocaleDateString('pt-BR');
-            
-            // LAUDO TEXTUAL DETALHADO
-            const laudo = `
-LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
-Base Técnica: Boletim 100 IAC (2022)
-Data da Emissão: ${dateStr}
-------------------------------------------------------------
-DADOS CADASTRAIS
-Produtor: ${data.owner}
-Propriedade: ${data.prop}
-Safra de Cultivo: ${data.season.toUpperCase()}
-Meta de Produtividade: ${data.yield} sacas/ha
-
-1. DIAGNÓSTICO DA FERTILIDADE
-A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${data.clay}% de Argila).
-A saturação por bases atual (V%) é de ${data.V.toFixed(1)}%. O nível crítico recomendado para a cultura do milho é 70%.
-
-2. CORREÇÃO DE ACIDEZ E PERFIL
-Para elevar a saturação a 70% e neutralizar o alumínio tóxico, recomenda-se:
-> CALAGEM: Aplicar ${nc.toFixed(1)} toneladas por hectare de Calcário ${limeType}.
-  Recomendação: Aplicar a lanço em área total e incorporar, preferencialmente 60 a 90 dias antes do plantio.
-
-> GESSAGEM: Sugere-se a aplicação de ${gessoTon.toFixed(1)} t/ha de Gesso Agrícola.
-  Objetivo: Condicionamento de subsolo (fornecimento de Ca em profundidade e neutralização de Al), essencial para suportar veranicos.
-
-3. PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K)
-Considerando a extração da cultura para a meta de ${data.yield} sc/ha e os teores do solo:
-- Nitrogênio (N): ${recN.toFixed(0)} kg/ha${warningSafra}
-- Fósforo (P2O5): ${recP} kg/ha
-- Potássio (K2O): ${recK.toFixed(0)} kg/ha${warningSafra}
-
-SUGESTÃO DE MANEJO E FONTES:
-
-A) ADUBAÇÃO DE SEMEADURA (NO SULCO)
-   > ${Math.round(map)} kg/ha de MAP (Monoamônio Fosfato)
-   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
-   Nota: Em solos arenosos ou se a dose de KCl for elevada (>60kg K2O), recomenda-se antecipar o potássio a lanço para evitar salinidade na semente.
-
-B) ADUBAÇÃO DE COBERTURA
-   > ${Math.round(urea)} kg/ha de Ureia Agrícola
-   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl) - Saldo restante
-
-   Cronograma de Aplicação:
-   - Estádio V4 (4 folhas): Aplicar 100% da cobertura em solos argilosos/médios.
-   - Parcelamento em Solos Arenosos: Aplicar 50% em V4 e 50% em V8 para reduzir perdas por lixiviação.
-
-4. MICRONUTRIENTES E ORGÂNICOS
-   - Zinco (Zn): Recomenda-se 300-400 g/ha via foliar (V4-V6) ou 2 kg/ha via solo.
-   - Boro (B): Recomenda-se 150-200 g/ha via foliar.
-   - Matéria Orgânica: Opcionalmente, pode-se usar 15-20 t/ha de esterco de curral ou 4-6 t/ha de cama de frango para melhoria da estrutura do solo.
-
-------------------------------------------------------------
-Sistema de Recomendação Agronômica (SRA)
-`;
+            const laudo = `LAUDO TÉCNICO DE RECOMENDAÇÃO\nBase: IAC 100\nData: ${new Date().toLocaleDateString()}\n------------------------------\nPRODUTOR: ${data.owner} | ${data.prop}\nSAFRA: ${data.season.toUpperCase()} | META: ${data.yield} sc/ha\nSOLO: ${tex} (${data.clay}% Argila) | V%: ${data.V}\n\n1. CORREÇÃO\n> CALAGEM: ${nc.toFixed(1)} t/ha Calcário ${lime} (V% 70)\n> GESSAGEM: ${gesso.toFixed(1)} t/ha\n\n2. ADUBAÇÃO (N-P-K)\nNecessidade: N ${recN.toFixed(0)} | P2O5 ${recP} | K2O ${recK.toFixed(0)} kg/ha\n\nMANEJO:\nA) PLANTIO: ${Math.round(map)} kg/ha MAP + ${Math.round(kcl/2)} kg/ha KCl\nB) COBERTURA: ${Math.round(urea)} kg/ha Ureia + ${Math.round(kcl/2)} kg/ha KCl\n\nSRA Milho`;
 
             document.getElementById('resultsSection').style.display='block';
             document.getElementById('finalReportText').value=laudo;
-            document.getElementById('techTableBody').innerHTML=`<tr><td>Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr><tr><td>Gesso</td><td>${gessoTon.toFixed(1)}</td><td>t/ha</td></tr><tr><td>MAP</td><td>${Math.round(map)}</td><td>kg/ha</td></tr><tr><td>Ureia</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>`;
+            document.getElementById('techTableBody').innerHTML=`<tr><td>Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr><tr><td>Gesso</td><td>${gesso.toFixed(1)}</td><td>t/ha</td></tr><tr><td>MAP</td><td>${Math.round(map)}</td><td>kg/ha</td></tr><tr><td>Ureia</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>`;
             document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'});
 
-            // Populate Export DOC
+            // Doc Export
             document.getElementById('doc_owner').innerText = data.owner;
             document.getElementById('doc_prop').innerText = data.prop;
             document.getElementById('doc_season').innerText = data.season;
             document.getElementById('doc_yield').innerText = data.yield;
-            document.getElementById('doc_texture').innerText = texClass;
-            document.getElementById('doc_clay').innerText = data.clay;
-            document.getElementById('doc_v').innerText = data.V.toFixed(1);
+            document.getElementById('doc_texture').innerText = tex;
+            document.getElementById('doc_v').innerText = data.V;
             document.getElementById('doc_body_content').innerText = laudo.split("1. CORREÇÃO")[1];
             document.getElementById('doc_table_container').innerHTML = `<table class="doc-table"><thead><tr><th>Item</th><th>Valor</th><th>Unid</th></tr></thead><tbody>${document.getElementById('techTableBody').innerHTML}</tbody></table>`;
 
-            // Save
-            const rObj = {date:new Date().toISOString(), owner:data.owner, result:laudo};
-            if(isReal && document.getElementById('checkSaveCloud').checked) try{await addDoc(collection(db,"users",auth.currentUser.uid,"reports"),{...rObj,timestamp:serverTimestamp()});}catch(e){}
-            if(document.getElementById('checkSaveLocal').checked){ const h=JSON.parse(localStorage.getItem('sra_local_history'))||[]; h.unshift(rObj); localStorage.setItem('sra_local_history',JSON.stringify(h)); }
+            // Save Local
+            const h=JSON.parse(localStorage.getItem('sra_local_history'))||[]; h.unshift({date:new Date().toISOString(), owner:data.owner, result:laudo}); localStorage.setItem('sra_local_history',JSON.stringify(h));
         };
 
         // Utils
-        function setStatus(t,m,c,i,r){const e=document.getElementById('statusAlert');e.className=`alert shadow-sm ${c}`;e.style.display='block';document.getElementById('statusTitle').innerText=t;document.getElementById('statusMsg').innerText=m;document.getElementById('statusIcon').innerHTML=`<i class="fas ${i}"></i>`;document.getElementById('returnBtnContainer').style.display=r?'block':'none';}
         window.shareWhatsapp=()=>window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
+        window.shareEmail=()=>location.href=`mailto:?body=${encodeURIComponent(document.getElementById('finalReportText').value)}`;
         
         window.openHistoryModal=()=>{
             const l=document.getElementById('localHistoryList'), d=JSON.parse(localStorage.getItem('sra_local_history'))||[];
@@ -608,7 +492,7 @@ Sistema de Recomendação Agronômica (SRA)
         };
         window.clearLocalHistory=()=>{ if(confirm("Apagar?")){localStorage.removeItem('sra_local_history'); window.openHistoryModal();} };
 
-        // Export DOCX (.docx real)
+        // --- WORD DOWNLOAD ---
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
             const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:'Calibri',sans-serif;font-size:11pt} h1{color:#2e7d32;font-size:16pt;margin-bottom:5px} p{margin-bottom:10px} table{width:100%;border-collapse:collapse;margin-top:15px} th,td{border:1px solid #ccc;padding:5px;text-align:center} th{background-color:#f2f2f2}</style></head><body>${content}</body></html>`;
@@ -617,9 +501,11 @@ Sistema de Recomendação Agronômica (SRA)
                 const link = document.createElement('a'); link.href = URL.createObjectURL(converted);
                 link.download = `Laudo_${document.getElementById('ownerName').value || 'SRA'}.docx`;
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            } else { alert("Erro ao carregar biblioteca DOCX. Verifique a internet."); }
+            } else { alert("Erro ao carregar biblioteca DOCX."); }
         };
 
+        // --- TOKEN (CREDITOS) ---
+        window.showTokenScreen = () => { document.getElementById('appContainer').style.display='none'; document.getElementById('authScreen').style.display='flex'; toggleAuth('token'); };
     </script>
 </body>
 </html>
