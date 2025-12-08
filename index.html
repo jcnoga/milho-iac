@@ -86,6 +86,8 @@
             text-align: center; font-size: 10px; color: #999; 
         }
     </style>
+
+	<script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
 </head>
 <body>
 
@@ -822,16 +824,59 @@ Sistema de Recomendação Agronômica (SRA)
         window.shareWhatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
         
         // EXPORTAR WORD (.DOC) - FUNÇÃO INFALÍVEL
-        window.downloadWord = () => {
-            const content = document.getElementById('exportContent').innerHTML;
-            const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Laudo</title><style>body{font-family:Arial} .doc-header{border-bottom:2px solid green;margin-bottom:20px} .doc-section-title{background:#f0f0f0;padding:5px;font-weight:bold;margin-top:15px; border-left:5px solid green} .doc-table{width:100%;border-collapse:collapse} .doc-table td, .doc-table th{border:1px solid #999;padding:5px}</style></head><body>";
-            const postHtml = "</body></html>";
-            const blob = new Blob(['\ufeff', preHtml + content + postHtml], { type: 'application/msword' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Laudo_${document.getElementById('ownerName').value}.doc`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        };
+window.downloadWord = () => {
+    // 1. Pega o conteúdo do elemento
+    const content = document.getElementById('exportContent').innerHTML;
+    
+    // 2. Monta a estrutura HTML completa com o CSS embutido
+    // É necessário repetir o CSS aqui para que o conversor entenda a formatação
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: 'Arial', sans-serif; font-size: 11pt; }
+                    .doc-header { border-bottom: 2px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
+                    .doc-title { font-size: 16pt; font-weight: bold; color: #2e7d32; margin: 0; }
+                    .doc-subtitle { font-size: 10pt; color: #555; }
+                    .doc-section-title { 
+                        background-color: #f0f0f0; 
+                        padding: 5px; 
+                        font-weight: bold; 
+                        margin-top: 15px; 
+                        border-left: 5px solid #2e7d32; 
+                    }
+                    .doc-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    .doc-table td, .doc-table th { border: 1px solid #999; padding: 5px; text-align: center; }
+                    .doc-text { text-align: justify; }
+                </style>
+            </head>
+            <body>
+                ${content}
+            </body>
+        </html>`;
+
+    // 3. Verifica se a biblioteca foi carregada e gera o arquivo
+    if (typeof htmlDocx !== 'undefined') {
+        // Converte o HTML para Blob DOCX
+        const converted = htmlDocx.asBlob(htmlContent);
+        
+        // Cria o link de download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(converted);
+        
+        // Define o nome com a extensão .DOCX
+        const ownerName = document.getElementById('ownerName').value || 'SRA';
+        link.download = `Laudo_${ownerName}.docx`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        alert("Erro: A biblioteca html-docx.js não foi carregada. Verifique sua conexão.");
+    }
+};
 
         // EXPORTAR PDF (JANELA DE IMPRESSÃO)
         window.printPDF = () => {
