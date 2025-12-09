@@ -574,6 +574,12 @@
             document.getElementById('soilCTC').value = rnd(60, 110);
             document.getElementById('soilV').value = rnd(30, 65);
             
+            // --- MODIFICAÇÃO SOLICITADA: Preenchimento Específico ---
+            document.getElementById('cropSeason').value = 'verao';
+            document.getElementById('prevCulture').value = 'milho';
+            document.getElementById('systemType').value = 'conv';
+            // --------------------------------------------------------
+
             window.calculateSB();
             
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el => { 
