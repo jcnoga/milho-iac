@@ -141,10 +141,9 @@
             
             <!-- Link do WhatsApp para Suporte -->
             <p class="text-center small text-muted">
-			
-            <a href="https://wa.me/5534997824990" target="_blank" class="text-decoration-none text-success fw-bold"> 
-			 
-                    <i class="fab fa-whatsapp"></i> Envie o código para o suporte (WhatsApp) 34997824990 seguido de -xx onde xx é o número de recomendações solicitadas
+                <!-- O href será atualizado dinamicamente via JS com o código gerado -->
+                <a id="whatsappLink" href="#" target="_blank" class="text-decoration-none text-success fw-bold">
+                    <i class="fab fa-whatsapp"></i> Envie o código para o suporte (WhatsApp) 34-99782-4990
                 </a>
             </p>
 
@@ -154,7 +153,8 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Senha de Liberação</label>
-                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="Cole a senha aqui">
+                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="cole sua senha aqui: Senha-XX">
+                <div class="form-text text-center text-muted small mt-2">Exemplo: 1234-05 (Senha-Quantidade)</div>
             </div>
             <div class="d-grid gap-2">
                 <button class="btn btn-success btn-lg fw-bold" id="btnTokenAction">VALIDAR CRÉDITOS</button>
@@ -540,6 +540,11 @@
             document.getElementById('tokenForm').style.display = 'block';
             appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
             document.getElementById('displayAuthCode').innerText = appState.generatedCode;
+
+            // ATUALIZA O LINK DO WHATSAPP COM A MENSAGEM DINÂMICA
+            const baseMsg = `Olá, desejo adquirir créditos para recomendação. Código para referência: ${appState.generatedCode}__`;
+            const encodedMsg = encodeURIComponent(baseMsg);
+            document.getElementById('whatsappLink').href = `https://wa.me/5534997824990?text=${encodedMsg}`;
         };
 
         document.getElementById('btnTokenAction').addEventListener('click', async () => {
@@ -614,6 +619,18 @@
 
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             e.preventDefault();
+
+            // --- NOVO: VALIDAÇÃO DE ZEROS ---
+            const vP = parseFloat(document.getElementById('soilP').value) || 0;
+            const vCa = parseFloat(document.getElementById('soilCa').value) || 0;
+            const vMg = parseFloat(document.getElementById('soilMg').value) || 0;
+
+            if (vP === 0 || vCa === 0 || vMg === 0) {
+                alert("Atenção: Os valores de Fósforo (P), Cálcio (Ca) e Magnésio (Mg) são obrigatórios e não podem ser zero para o cálculo.");
+                return;
+            }
+            // --------------------------------
+            
             const isReal = !appState.isDemo && !appState.isFreeExample;
             
             if (isReal) {
