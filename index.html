@@ -431,7 +431,7 @@
 
         // --- VARIÁVEIS GLOBAIS ---
         let currentUserData = null;
-        let appState = { generatedCode: null, isDemo: false, isFreeExample: false };
+        let appState = { generatedCode: null, isDemo: false, isFreeExample: false, currentSamplePaid: false };
 
         const els = {
             authScreen: document.getElementById('authScreen'),
@@ -574,6 +574,7 @@
 
         window.triggerExampleData = () => {
             appState.isFreeExample = true;
+            appState.currentSamplePaid = false; // Reset just in case
             setStatus("SIMULAÇÃO GRÁTIS", "Dados fictícios gerados. Não consome créditos.", "alert-warning", "fa-magic", true);
             const rnd = (min,max) => (Math.random()*(max-min)+min).toFixed(1);
             
@@ -606,6 +607,7 @@
 
         window.resetToRealMode = () => {
             appState.isFreeExample = false;
+            appState.currentSamplePaid = false; // RESET FLAG
             document.getElementById('statusAlert').style.display = 'none';
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el => { 
                 el.readOnly = false; el.classList.remove('demo-locked'); el.value = ''; 
@@ -635,12 +637,17 @@
             
             if (isReal) {
                 if (!auth.currentUser || !currentUserData) return alert("Faça login novamente.");
-                if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
-                try {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
-                    currentUserData.credits--;
-                    updateHeader();
-                } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
+                
+                // ONLY DEDUCT IF NOT ALREADY PAID FOR THIS SESSION
+                if (!appState.currentSamplePaid) {
+                    if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
+                    try {
+                        await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
+                        currentUserData.credits--;
+                        updateHeader();
+                        appState.currentSamplePaid = true; // MARK AS PAID
+                    } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
+                }
             }
 
             const get = id => parseFloat(document.getElementById(id).value)||0;
