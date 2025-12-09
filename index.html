@@ -11,6 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- html-docx-js para geração de DOCX -->
     <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
+    <!-- html2pdf.js para geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
@@ -62,7 +64,7 @@
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/PDF) --- */
         #exportContent { display: none; }
         
         .doc-header { border-bottom: 3px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
@@ -328,8 +330,9 @@
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button></div>
-                                    <!-- Botão de E-mail (Substituindo Impressão) -->
-                                    <div class="col-12 mt-2"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
+                                    <div class="col-md-6"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
+                                    <!-- Botão PDF Adicionado -->
+                                    <div class="col-md-6"><button class="btn btn-danger w-100 fw-bold py-2" onclick="downloadPDF()"><i class="fas fa-file-pdf me-2"></i> Baixar PDF</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -370,7 +373,7 @@
         </div>
     </div>
 
-    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC -->
+    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PDF -->
     <div id="exportContent">
         <div class="doc-header">
             <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -828,9 +831,7 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('doc_texture').innerText = texClass;
             document.getElementById('doc_clay').innerText = data.clay;
             document.getElementById('doc_v').innerText = data.V;
-            // O conteúdo do corpo será todo o laudo texto, excluindo apenas o cabeçalho que o template já tem
-            // Porém, como o laudo mudou de estrutura, vamos copiar o texto completo gerado
-            // para o corpo do documento para garantir fidelidade
+            // Atualizar o corpo do documento para usar o laudo completo (fidelidade ao visto em tela)
             document.getElementById('doc_body_content').innerText = laudo;
             
             // Copiar tabela para o doc
@@ -908,44 +909,42 @@ Sistema de Recomendação Agronômica (SRA)
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         };
 
-        // EXPORTAR WORD (.DOCX) - UTILIZANDO A BIBLIOTECA HTML-DOCX-JS
+        // EXPORTAR WORD (.DOCX)
         window.downloadWord = () => {
-            // Obtém o conteúdo HTML do template oculto
             const content = document.getElementById('exportContent').innerHTML;
-            
-            // Monta uma estrutura HTML5 completa para a biblioteca converter
-            const htmlString = `<!DOCTYPE html>
-            <html lang="pt-BR">
-            <head>
-                <meta charset="UTF-8">
-                <title>Laudo Técnico</title>
-                <style>
-                    body { font-family: Arial, sans-serif; } 
-                    .doc-header { border-bottom: 2px solid green; margin-bottom: 20px; } 
-                    .doc-section-title { background: #f0f0f0; padding: 5px; font-weight: bold; margin-top: 15px; border-left: 5px solid green; } 
-                    .doc-table { width: 100%; border-collapse: collapse; } 
-                    .doc-table td, .doc-table th { border: 1px solid #999; padding: 5px; }
-                </style>
-            </head>
-            <body>${content}</body>
-            </html>`;
-            
-            // Verifica se a biblioteca foi carregada corretamente
+            const htmlString = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Laudo Técnico</title><style>body { font-family: Arial, sans-serif; } .doc-header { border-bottom: 2px solid green; margin-bottom: 20px; } .doc-section-title { background: #f0f0f0; padding: 5px; font-weight: bold; margin-top: 15px; border-left: 5px solid green; } .doc-table { width: 100%; border-collapse: collapse; } .doc-table td, .doc-table th { border: 1px solid #999; padding: 5px; }</style></head><body>${content}</body></html>`;
             if (window.htmlDocx) {
-                // Converte o HTML para Blob no formato DOCX
                 const blob = window.htmlDocx.asBlob(htmlString, {orientation: 'portrait'});
-                
-                // Cria o link de download
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = `Laudo_${document.getElementById('ownerName').value}.docx`;
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                alert("A biblioteca de conversão .docx ainda não foi carregada. Tente novamente em alguns segundos ou verifique sua conexão.");
-            }
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            } else { alert("A biblioteca .docx ainda não carregou."); }
+        };
+
+        // EXPORTAR PDF
+        window.downloadPDF = () => {
+            // Clonar o conteúdo oculto para manipulá-lo
+            const element = document.getElementById('exportContent').cloneNode(true);
+            
+            // Garantir que o clone esteja visível para a biblioteca capturar (mas fora da tela)
+            element.style.display = 'block';
+            element.style.width = '800px'; 
+            element.style.padding = '20px';
+            element.style.background = 'white';
+            
+            const opt = {
+                margin: 10,
+                filename: `Laudo_${document.getElementById('ownerName').value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Gerar e Salvar
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Limpeza (opcional, pois o clone não foi anexado ao DOM principal, mas se fosse, removeria aqui)
+            });
         };
 
     </script>
