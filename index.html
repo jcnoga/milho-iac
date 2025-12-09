@@ -60,14 +60,8 @@
         }
         .table-tech th { background-color: var(--light-green); color: var(--dark-green); }
 
-        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD/IMPRESSÃO) --- */
+        /* --- ESTILOS DO DOCUMENTO EXPORTADO (WORD) --- */
         #exportContent { display: none; }
-        
-        @media print {
-            body * { visibility: hidden; }
-            #exportContent, #exportContent * { visibility: visible; display: block !important; }
-            #exportContent { position: absolute; left: 0; top: 0; width: 100%; padding: 40px; }
-        }
         
         .doc-header { border-bottom: 3px solid #2e7d32; margin-bottom: 20px; padding-bottom: 10px; }
         .doc-title { font-size: 24px; font-weight: bold; color: #2e7d32; margin: 0; }
@@ -171,9 +165,16 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
-                    <span class="badge bg-white text-success p-2 shadow-sm me-3">
-                        <i class="fas fa-coins"></i> <span id="creditCounter" class="fw-bold">...</span>
-                    </span>
+                    
+                    <!-- Contador e Aviso de Créditos -->
+                    <div class="d-flex flex-column align-items-end me-3">
+                        <span class="badge bg-white text-success p-2 shadow-sm">
+                            <i class="fas fa-coins"></i> <span id="creditCounter" class="fw-bold">...</span>
+                        </span>
+                        <small id="lowCreditWarning" class="fw-bold mt-1" style="display:none; color: #ffd54f; font-size: 11px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                            Seus créditos estão acabando
+                        </small>
+                    </div>
                     
                     <button class="btn btn-outline-light btn-sm me-2 fw-bold" onclick="openHistoryModal()">
                         <i class="fas fa-history"></i> Histórico
@@ -316,8 +317,8 @@
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.doc)</button></div>
-                                    <!-- Botão de Impressão Nativa (Gera PDF) -->
-                                    <div class="col-12 mt-2"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="printReport()"><i class="fas fa-print me-2"></i> Imprimir / Salvar PDF (Nativo)</button></div>
+                                    <!-- Botão de E-mail (Substituindo Impressão) -->
+                                    <div class="col-12 mt-2"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -358,7 +359,7 @@
         </div>
     </div>
 
-    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PRINT -->
+    <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC -->
     <div id="exportContent">
         <div class="doc-header">
             <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -398,15 +399,15 @@
         // ==============================================================
         // ATENÇÃO: SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ABAIXO
         // ==============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
-  authDomain: "milho-iac.firebaseapp.com",
-  projectId: "milho-iac",
- storageBucket: "milho-iac.firebasestorage.app",
-  messagingSenderId: "1072500431786",
-  appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
-  measurementId: "G-07R2DFGE8T"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyB5LjcVrlnBSTQyzbj1PxOFoO176KnHdZs",
+          authDomain: "milho-iac.firebaseapp.com",
+          projectId: "milho-iac",
+          storageBucket: "milho-iac.firebasestorage.app",
+          messagingSenderId: "1072500431786",
+          appId: "1:1072500431786:web:7b9ac660aa47f6433969d3",
+          measurementId: "G-07R2DFGE8T"
+        };
 
         let app, auth, db;
         try {
@@ -505,9 +506,18 @@ const firebaseConfig = {
             if (appState.isDemo) {
                 els.creditBadges.innerText = "DEMO";
                 els.userNameDisplay.innerText = "Visitante";
+                document.getElementById('lowCreditWarning').style.display = 'none';
             } else if (currentUserData) {
                 els.creditBadges.innerText = currentUserData.credits;
                 els.userNameDisplay.innerText = currentUserData.name;
+                
+                // Aviso de Créditos Acabando
+                const warningEl = document.getElementById('lowCreditWarning');
+                if(currentUserData.credits < 3) {
+                    warningEl.style.display = 'block';
+                } else {
+                    warningEl.style.display = 'none';
+                }
             }
         }
 
@@ -519,7 +529,6 @@ const firebaseConfig = {
             document.getElementById('tokenForm').style.display = 'block';
             appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
             document.getElementById('displayAuthCode').innerText = appState.generatedCode;
-            console.log("SENHA DEBUG:", (appState.generatedCode + 13) * 9 + 1954 + "10");
         };
 
         document.getElementById('btnTokenAction').addEventListener('click', async () => {
@@ -821,6 +830,13 @@ Sistema de Recomendação Agronômica (SRA)
         // --- EXPORTAR ---
         window.shareWhatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
         
+        // FUNÇÃO DE ENVIO POR E-MAIL
+        window.sendEmail = () => {
+            const subject = "Laudo Técnico - SRA Milho";
+            const body = encodeURIComponent(document.getElementById('finalReportText').value);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        };
+
         // EXPORTAR WORD (.DOC) - FUNÇÃO INFALÍVEL
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
@@ -831,18 +847,6 @@ Sistema de Recomendação Agronômica (SRA)
             link.href = URL.createObjectURL(blob);
             link.download = `Laudo_${document.getElementById('ownerName').value}.doc`;
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        };
-
-        // EXPORTAR PDF (JANELA DE IMPRESSÃO)
-        window.printPDF = () => {
-            const content = document.getElementById('exportContent').innerHTML;
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Laudo Agronômico</title><style>body{font-family:Arial,sans-serif;padding:40px} .doc-header{border-bottom:3px solid #1b5e20;margin-bottom:20px} .doc-section-title{background:#f0f0f0;border-left:5px solid #1b5e20;padding:10px;font-weight:bold;margin-top:20px} .doc-text{text-align:justify;line-height:1.5}</style></head><body>');
-            printWindow.document.write(content);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 500);
         };
 
     </script>
