@@ -589,7 +589,7 @@
             document.getElementById('soilCTC').value = rnd(60, 110);
             document.getElementById('soilV').value = rnd(30, 65);
             
-            // --- MODIFICAÇÃO SOLICITADA: Preenchimento Específico ---
+            // --- Preenchimento Específico ---
             document.getElementById('cropSeason').value = 'verao';
             document.getElementById('prevCulture').value = 'milho';
             document.getElementById('systemType').value = 'conv';
@@ -622,7 +622,7 @@
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             e.preventDefault();
 
-            // --- NOVO: VALIDAÇÃO DE ZEROS ---
+            // --- VALIDAÇÃO DE ZEROS ---
             const vP = parseFloat(document.getElementById('soilP').value) || 0;
             const vCa = parseFloat(document.getElementById('soilCa').value) || 0;
             const vMg = parseFloat(document.getElementById('soilMg').value) || 0;
@@ -659,7 +659,17 @@
                 prevCult: document.getElementById('prevCulture').value,
                 clay: get('soilClay'), P: get('soilP'), K: get('soilK'),
                 V: get('soilV'), CTC: get('soilCTC'), PRNT: get('limePRNT')||100,
-                Mg: get('soilMg')
+                Mg: get('soilMg'),
+                Ca: get('soilCa'),
+                SB: get('soilSB')
+            };
+
+            // FUNÇÃO DE FORMATAÇÃO INTELIGENTE
+            const formatSmart = (val) => {
+                const num = parseFloat(val);
+                if (isNaN(num)) return val;
+                if (num < 10) return num.toFixed(1);
+                return Math.round(num).toString();
             };
 
             // --- CÁLCULOS IAC 100 COMPLETOS ---
@@ -721,46 +731,62 @@
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
             
-            // LAUDO TEXTUAL DETALHADO
+            // LAUDO TEXTUAL DETALHADO REESTRUTURADO
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
 Data da Emissão: ${dateStr}
 ------------------------------------------------------------
-DADOS CADASTRAIS
+1. DADOS CADASTRAIS
 Produtor: ${data.owner}
 Propriedade: ${data.prop}
-Safra de Cultivo: ${data.season.toUpperCase()}
+Protocolo: ${document.getElementById('protocolId').value}
+Safra: ${data.season.toUpperCase()}
 Meta de Produtividade: ${data.yield} sacas/ha
+Sistema de Cultivo: ${document.getElementById('systemType').options[document.getElementById('systemType').selectedIndex].text}
+Cultura Anterior: ${document.getElementById('prevCulture').options[document.getElementById('prevCulture').selectedIndex].text}
 
-1. DIAGNÓSTICO DA FERTILIDADE
-A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${data.clay}% de Argila).
-A saturação por bases atual (V%) é de ${data.V}%. O nível crítico recomendado para a cultura do milho é 70%.
+2. DADOS ANALÍTICOS DA AMOSTRA
+Argila: ${formatSmart(data.clay)}%
+Fósforo (P-resina): ${formatSmart(data.P)} mg/dm³
+Potássio (K): ${formatSmart(data.K)} mmolc/dm³
+Cálcio (Ca): ${formatSmart(data.Ca)} mmolc/dm³
+Magnésio (Mg): ${formatSmart(data.Mg)} mmolc/dm³
+Soma de Bases (SB): ${formatSmart(data.SB)} mmolc/dm³
+CTC (pH 7): ${formatSmart(data.CTC)} mmolc/dm³
+Saturação por Bases (V%): ${formatSmart(data.V)}%
+PRNT Calcário: ${formatSmart(data.PRNT)}%
 
-2. CORREÇÃO DE ACIDEZ E PERFIL
+3. RECOMENDAÇÃO AGRONÔMICA
+
+DIAGNÓSTICO:
+A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${formatSmart(data.clay)}% de Argila).
+A saturação por bases atual (V%) é de ${formatSmart(data.V)}%. O nível crítico recomendado para a cultura do milho é 70%.
+
+CORREÇÃO DE ACIDEZ E PERFIL:
 Para elevar a saturação a 70% e neutralizar o alumínio tóxico, recomenda-se:
-> CALAGEM: Aplicar ${nc.toFixed(1)} toneladas por hectare de Calcário ${limeType}.
+> CALAGEM: Aplicar ${formatSmart(nc)} toneladas por hectare de Calcário ${limeType}.
   Recomendação: Aplicar a lanço em área total e incorporar, preferencialmente 60 a 90 dias antes do plantio.
 
-> GESSAGEM: Sugere-se a aplicação de ${gessoTon.toFixed(1)} t/ha de Gesso Agrícola.
+> GESSAGEM: Sugere-se a aplicação de ${formatSmart(gessoTon)} t/ha de Gesso Agrícola.
   Objetivo: Condicionamento de subsolo (fornecimento de Ca em profundidade e neutralização de Al), essencial para suportar veranicos.
 
-3. PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K)
+PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K):
 Considerando a extração da cultura para a meta de ${data.yield} sc/ha e os teores do solo:
-- Nitrogênio (N): ${recN.toFixed(0)} kg/ha${warningSafra}
-- Fósforo (P2O5): ${recP} kg/ha
-- Potássio (K2O): ${recK.toFixed(0)} kg/ha${warningSafra}
+- Nitrogênio (N): ${formatSmart(recN)} kg/ha${warningSafra}
+- Fósforo (P2O5): ${formatSmart(recP)} kg/ha
+- Potássio (K2O): ${formatSmart(recK)} kg/ha${warningSafra}
 
 SUGESTÃO DE MANEJO E FONTES:
 
 A) ADUBAÇÃO DE SEMEADURA (NO SULCO)
-   > ${Math.round(map)} kg/ha de MAP (Monoamônio Fosfato)
-   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
+   > ${formatSmart(map)} kg/ha de MAP (Monoamônio Fosfato)
+   > ${formatSmart(kcl/2)} kg/ha de Cloreto de Potássio (KCl)
    Nota: Em solos arenosos ou se a dose de KCl for elevada (>60kg K2O), recomenda-se antecipar o potássio a lanço para evitar salinidade na semente.
 
 B) ADUBAÇÃO DE COBERTURA
-   > ${Math.round(urea)} kg/ha de Ureia Agrícola
-   > ${Math.round(kcl/2)} kg/ha de Cloreto de Potássio (KCl) - Saldo restante
+   > ${formatSmart(urea)} kg/ha de Ureia Agrícola
+   > ${formatSmart(kcl/2)} kg/ha de Cloreto de Potássio (KCl) - Saldo restante
 
    Cronograma de Aplicação:
    - Estádio V4 (4 folhas): Aplicar 100% da cobertura em solos argilosos/médios.
@@ -779,17 +805,17 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('resultsSection').style.display = 'block';
             document.getElementById('finalReportText').value = laudo.trim();
             
-            // Tabela Técnica
+            // Tabela Técnica (Valores também formatados)
             const tbody = document.getElementById('techTableBody');
             tbody.innerHTML = `
-                <tr><td>Nec. Calagem</td><td>${nc.toFixed(1)}</td><td>t/ha</td></tr>
-                <tr><td>Nec. Gesso</td><td>${gessoTon.toFixed(1)}</td><td>t/ha</td></tr>
-                <tr><td>N Total</td><td>${recN.toFixed(0)}</td><td>kg/ha</td></tr>
-                <tr><td>P2O5 Total</td><td>${recP}</td><td>kg/ha</td></tr>
-                <tr><td>K2O Total</td><td>${recK.toFixed(0)}</td><td>kg/ha</td></tr>
-                <tr><td>MAP Estimado</td><td>${Math.round(map)}</td><td>kg/ha</td></tr>
-                <tr><td>Ureia Estimada</td><td>${Math.round(urea)}</td><td>kg/ha</td></tr>
-                <tr><td>KCl Estimado</td><td>${Math.round(kcl)}</td><td>kg/ha</td></tr>
+                <tr><td>Nec. Calagem</td><td>${formatSmart(nc)}</td><td>t/ha</td></tr>
+                <tr><td>Nec. Gesso</td><td>${formatSmart(gessoTon)}</td><td>t/ha</td></tr>
+                <tr><td>N Total</td><td>${formatSmart(recN)}</td><td>kg/ha</td></tr>
+                <tr><td>P2O5 Total</td><td>${formatSmart(recP)}</td><td>kg/ha</td></tr>
+                <tr><td>K2O Total</td><td>${formatSmart(recK)}</td><td>kg/ha</td></tr>
+                <tr><td>MAP Estimado</td><td>${formatSmart(map)}</td><td>kg/ha</td></tr>
+                <tr><td>Ureia Estimada</td><td>${formatSmart(urea)}</td><td>kg/ha</td></tr>
+                <tr><td>KCl Estimado</td><td>${formatSmart(kcl)}</td><td>kg/ha</td></tr>
             `;
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
@@ -802,7 +828,11 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('doc_texture').innerText = texClass;
             document.getElementById('doc_clay').innerText = data.clay;
             document.getElementById('doc_v').innerText = data.V;
-            document.getElementById('doc_body_content').innerText = laudo.substring(laudo.indexOf("2. CORREÇÃO"));
+            // O conteúdo do corpo será todo o laudo texto, excluindo apenas o cabeçalho que o template já tem
+            // Porém, como o laudo mudou de estrutura, vamos copiar o texto completo gerado
+            // para o corpo do documento para garantir fidelidade
+            document.getElementById('doc_body_content').innerText = laudo;
+            
             // Copiar tabela para o doc
             document.getElementById('doc_table_container').innerHTML = `
                 <table class="doc-table">
