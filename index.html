@@ -336,8 +336,7 @@
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button></div>
                                     <div class="col-md-6"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
-                                    
-                                    <!-- Botão de Visualizar em Tela (Substituindo o Baixar Direto) -->
+                                    <!-- Botão PDF -->
                                     <div class="col-md-6"><button class="btn btn-danger w-100 fw-bold py-2" onclick="openPdfPreview()"><i class="fas fa-eye me-2"></i> Visualizar em Tela (PDF)</button></div>
                                 </div>
                             </div>
@@ -439,7 +438,7 @@
         // --- VARIÁVEIS GLOBAIS ---
         let currentUserData = null;
         let appState = { generatedCode: null, isDemo: false, isFreeExample: false, currentSamplePaid: false };
-        let currentPdfBlobUrl = null; // Para armazenar o PDF gerado
+        let currentPdfBlobUrl = null;
 
         const els = {
             authScreen: document.getElementById('authScreen'),
@@ -922,14 +921,21 @@ Sistema de Recomendação Agronômica (SRA)
 
         // --- VISUALIZAR PDF ---
         window.openPdfPreview = () => {
-            // Clonar o conteúdo oculto para manipulá-lo
-            const element = document.getElementById('exportContent').cloneNode(true);
+            // CORREÇÃO TELA BRANCA: CLONAR E ANEXAR AO BODY (ESCONDIDO)
+            const originalContent = document.getElementById('exportContent');
+            const element = originalContent.cloneNode(true);
             
-            // Configurar estilos para renderização correta
+            // Força estilos para renderização correta
             element.style.display = 'block';
+            element.style.position = 'absolute';
+            element.style.left = '-9999px'; // Esconde da visão do usuário
+            element.style.top = '0';
             element.style.width = '800px'; 
             element.style.padding = '20px';
             element.style.background = 'white';
+            
+            // Anexa ao DOM para que o html2canvas consiga ler
+            document.body.appendChild(element);
             
             const opt = {
                 margin: 10,
@@ -939,12 +945,15 @@ Sistema de Recomendação Agronômica (SRA)
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Gerar o PDF como Blob URL e exibir no iframe
+            // Gerar o PDF como Blob URL
             html2pdf().set(opt).from(element).output('bloburl').then((pdfUrl) => {
                 currentPdfBlobUrl = pdfUrl; // Salva a referência para o download
                 const iframe = document.getElementById('pdfPreviewFrame');
                 iframe.src = pdfUrl;
                 
+                // Remove o elemento temporário do DOM
+                document.body.removeChild(element);
+
                 // Abre o modal
                 const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
                 modal.show();
