@@ -279,6 +279,11 @@
                             
                             <div class="col-md-3 mt-3"><label class="form-label fw-bold text-success">V% (Saturação)</label><input type="number" class="form-control border-success" id="soilV" step="0.1"></div>
                             <div class="col-md-3 mt-3"><label class="form-label">PRNT Calcário</label><input type="number" class="form-control" id="limePRNT" value="80"></div>
+
+                            <!-- NOVOS CAMPOS: MICRONUTRIENTES (OPCIONAIS) -->
+                            <div class="col-12"><h6 class="text-muted border-bottom pb-2 mb-3 mt-3">Micronutrientes (Opcional)</h6></div>
+                            <div class="col-md-3"><label class="form-label">Zinco (Zn) mg/dm³</label><input type="number" class="form-control" id="soilZn" step="0.1"></div>
+                            <div class="col-md-3"><label class="form-label">Boro (B) mg/dm³</label><input type="number" class="form-control" id="soilB" step="0.01"></div>
                         </div>
                     </div>
                 </div>
@@ -572,6 +577,10 @@
             document.getElementById('cropSeason').value = 'verao';
             document.getElementById('prevCulture').value = 'milho';
             document.getElementById('systemType').value = 'conv';
+            
+            // NOVOS CAMPOS AUTOMÁTICOS
+            document.getElementById('soilZn').value = rnd(0.5, 5.0);
+            document.getElementById('soilB').value = rnd(0.1, 1.0);
             // --------------------------------------------------------
 
             window.calculateSB();
@@ -601,7 +610,7 @@
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             e.preventDefault();
 
-            // --- VALIDAÇÃO DE ZEROS ---
+            // --- VALIDAÇÃO DE ZEROS (APENAS P, Ca, Mg continuam obrigatórios) ---
             const vP = parseFloat(document.getElementById('soilP').value) || 0;
             const vCa = parseFloat(document.getElementById('soilCa').value) || 0;
             const vMg = parseFloat(document.getElementById('soilMg').value) || 0;
@@ -629,6 +638,11 @@
             }
 
             const get = id => parseFloat(document.getElementById(id).value)||0;
+            
+            // Pegar valores dos inputs (com ou sem valor, pois Zn e B são opcionais)
+            const znVal = document.getElementById('soilZn').value;
+            const bVal = document.getElementById('soilB').value;
+
             const data = {
                 owner: document.getElementById('ownerName').value,
                 prop: document.getElementById('propName').value,
@@ -639,7 +653,9 @@
                 V: get('soilV'), CTC: get('soilCTC'), PRNT: get('limePRNT')||100,
                 Mg: get('soilMg'),
                 Ca: get('soilCa'),
-                SB: get('soilSB')
+                SB: get('soilSB'),
+                Zn: znVal ? parseFloat(znVal) : null,
+                B: bVal ? parseFloat(bVal) : null
             };
 
             // FUNÇÃO DE FORMATAÇÃO INTELIGENTE
@@ -701,7 +717,11 @@
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
             
-            // LAUDO TEXTUAL DETALHADO REESTRUTURADO (NOVA ORDEM)
+            // FORMATAÇÃO CONDICIONAL DE ZN E B PARA EXIBIÇÃO
+            const znDisplay = data.Zn !== null ? `${formatSmart(data.Zn)} mg/dm³` : "Não Informado";
+            const bDisplay = data.B !== null ? `${formatSmart(data.B)} mg/dm³` : "Não Informado";
+
+            // LAUDO TEXTUAL DETALHADO REESTRUTURADO
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
@@ -728,6 +748,8 @@ Soma de Bases (SB): ${formatSmart(data.SB)} mmolc/dm³
 CTC (pH 7): ${formatSmart(data.CTC)} mmolc/dm³
 Saturação por Bases (V%): ${formatSmart(data.V)}%
 PRNT Calcário: ${formatSmart(data.PRNT)}%
+Zinco (Zn): ${znDisplay}
+Boro (B): ${bDisplay}
 
 4. RECOMENDAÇÃO AGRONÔMICA
 
@@ -792,7 +814,7 @@ Sistema de Recomendação Agronômica (SRA)
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // GERAR HTML PARA EXPORTAÇÃO (PDF/DOCX) COM ESTRUTURA IDÊNTICA
+            // GERAR HTML PARA EXPORTAÇÃO (PDF/DOCX) COM ESTRUTURA IDÊNTICA E NOVOS CAMPOS
             const exportHTML = `
                 <div class="doc-header">
                     <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -815,7 +837,8 @@ Sistema de Recomendação Agronômica (SRA)
                 <div class="doc-text">
                     Argila: ${formatSmart(data.clay)}% | P: ${formatSmart(data.P)} mg/dm³ | K: ${formatSmart(data.K)} mmolc/dm³<br>
                     Ca: ${formatSmart(data.Ca)} mmolc/dm³ | Mg: ${formatSmart(data.Mg)} mmolc/dm³ | SB: ${formatSmart(data.SB)} mmolc/dm³<br>
-                    CTC: ${formatSmart(data.CTC)} mmolc/dm³ | V%: ${formatSmart(data.V)}% | PRNT: ${formatSmart(data.PRNT)}%
+                    CTC: ${formatSmart(data.CTC)} mmolc/dm³ | V%: ${formatSmart(data.V)}% | PRNT: ${formatSmart(data.PRNT)}%<br>
+                    <strong>Zinco (Zn):</strong> ${znDisplay} | <strong>Boro (B):</strong> ${bDisplay}
                 </div>
 
                 <div class="doc-section-title">4. RECOMENDAÇÃO AGRONÔMICA</div>
