@@ -331,7 +331,7 @@
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button></div>
                                     <div class="col-md-6"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
-                                    <!-- Botão PDF Adicionado -->
+                                    <!-- Botão PDF -->
                                     <div class="col-md-6"><button class="btn btn-danger w-100 fw-bold py-2" onclick="downloadPDF()"><i class="fas fa-file-pdf me-2"></i> Baixar PDF</button></div>
                                 </div>
                             </div>
@@ -374,32 +374,8 @@
     </div>
 
     <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PDF -->
-    <div id="exportContent">
-        <div class="doc-header">
-            <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
-            <p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p>
-        </div>
-
-        <div class="doc-section-title">1. IDENTIFICAÇÃO E DIAGNÓSTICO</div>
-        <div class="doc-text">
-            <strong>Produtor:</strong> <span id="doc_owner"></span><br>
-            <strong>Propriedade:</strong> <span id="doc_prop"></span><br>
-            <strong>Safra:</strong> <span id="doc_season"></span> | <strong>Meta:</strong> <span id="doc_yield"></span> sc/ha<br>
-            <strong>Solo:</strong> Classe Textural <span id="doc_texture"></span> (<span id="doc_clay"></span>% Argila)<br>
-            <strong>Situação Atual:</strong> V% = <span id="doc_v"></span>%
-        </div>
-
-        <div class="doc-section-title">2. CORREÇÃO E NUTRIÇÃO</div>
-        <div class="doc-text" id="doc_body_content"></div>
-
-        <div class="doc-section-title">3. RESUMO TÉCNICO</div>
-        <div id="doc_table_container"></div>
-
-        <div class="doc-footer">
-            Documento gerado eletronicamente pelo SRA (Sistema de Recomendação Agronômica).<br>
-            Responsável Técnico: __________________________________________________
-        </div>
-    </div>
+    <!-- Conteúdo será injetado dinamicamente -->
+    <div id="exportContent"></div>
 
     <!-- LÓGICA DO SISTEMA -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -634,7 +610,6 @@
                 alert("Atenção: Os valores de Fósforo (P), Cálcio (Ca) e Magnésio (Mg) são obrigatórios e não podem ser zero para o cálculo.");
                 return;
             }
-            // --------------------------------
             
             const isReal = !appState.isDemo && !appState.isFreeExample;
             
@@ -676,47 +651,40 @@
             };
 
             // --- CÁLCULOS IAC 100 COMPLETOS ---
-            
-            // 1. Textura
             let texClass = "";
             if (data.clay <= 20) texClass = "Arenosa";
             else if (data.clay <= 60) texClass = "Média";
             else texClass = "Argilosa";
 
-            // 2. Calagem
             let nc = 0;
             if(data.V < 70) nc = ((70 - data.V) * data.CTC) / (data.PRNT * 10);
             nc = Math.max(0, nc);
             let limeType = data.Mg < 5 ? "Dolomítico (Fonte de Mg)" : "Calcítico";
 
-            // 3. Fósforo (IAC Tabela 1 Completa)
             let recP = 0;
             if(texClass === "Arenosa") {
                 if(data.P <= 10) recP = 80; else if(data.P <= 20) recP = 60; else if(data.P <= 30) recP = 40; else recP = 20;
             } else if(texClass === "Média") {
                 if(data.P <= 10) recP = 100; else if(data.P <= 20) recP = 80; else if(data.P <= 30) recP = 60; else recP = 40;
-            } else { // Argilosa
+            } else {
                 if(data.P <= 10) recP = 120; else if(data.P <= 20) recP = 100; else if(data.P <= 30) recP = 80; else recP = 60;
             }
 
-            // 4. Potássio (IAC Tabela 1 Completa)
             let recK = 0;
             if(texClass === "Arenosa") {
                 if(data.K <= 0.8) recK = 80; else if(data.K <= 1.5) recK = 60; else if(data.K <= 2.5) recK = 40; else recK = 20;
             } else if(texClass === "Média") {
                 if(data.K <= 1.0) recK = 100; else if(data.K <= 2.0) recK = 80; else if(data.K <= 3.5) recK = 60; else recK = 40;
-            } else { // Argilosa
+            } else {
                 if(data.K <= 1.2) recK = 120; else if(data.K <= 2.5) recK = 100; else if(data.K <= 4.5) recK = 80; else recK = 60;
             }
 
-            // 5. Nitrogênio (IAC Tabela 2 Completa)
             let recN = 0;
-            const highYield = data.yield > 100; // > 100 sc/ha (6t)
+            const highYield = data.yield > 100; 
             if(data.prevCult === "milho") recN = highYield ? 80 : 60;
             else if(data.prevCult === "graminea") recN = highYield ? 100 : 80;
             else recN = highYield ? 60 : 40;
 
-            // Ajuste Safrinha e Produtividade extra
             if (data.yield > 120) recN += (data.yield - 100) * 1.0; 
             
             let warningSafra = "";
@@ -725,31 +693,32 @@
                 warningSafra = " (Redução de 20% para Safrinha)";
             }
 
-            // Fontes
-            const map = recP / 0.52; // 52% P2O5
-            const kcl = recK / 0.60; // 60% K2O
-            const nFromMap = map * 0.11; // 11% N
-            const urea = Math.max(0, recN - nFromMap) / 0.45; // 45% N
+            const map = recP / 0.52; 
+            const kcl = recK / 0.60; 
+            const nFromMap = map * 0.11; 
+            const urea = Math.max(0, recN - nFromMap) / 0.45; 
             const gessoTon = (data.clay * 50) / 1000;
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
             
-            // LAUDO TEXTUAL DETALHADO REESTRUTURADO
+            // LAUDO TEXTUAL DETALHADO REESTRUTURADO (NOVA ORDEM)
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
 Data da Emissão: ${dateStr}
 ------------------------------------------------------------
-1. DADOS CADASTRAIS
-Produtor: ${data.owner}
-Propriedade: ${data.prop}
+1. DADOS DO PRODUTOR
+Nome: ${data.owner}
+
+2. DADOS DA PROPRIEDADE
+Nome da Propriedade: ${data.prop}
 Protocolo: ${document.getElementById('protocolId').value}
 Safra: ${data.season.toUpperCase()}
 Meta de Produtividade: ${data.yield} sacas/ha
 Sistema de Cultivo: ${document.getElementById('systemType').options[document.getElementById('systemType').selectedIndex].text}
 Cultura Anterior: ${document.getElementById('prevCulture').options[document.getElementById('prevCulture').selectedIndex].text}
 
-2. DADOS ANALÍTICOS DA AMOSTRA
+3. DADOS ANALÍTICOS DA AMOSTRA
 Argila: ${formatSmart(data.clay)}%
 Fósforo (P-resina): ${formatSmart(data.P)} mg/dm³
 Potássio (K): ${formatSmart(data.K)} mmolc/dm³
@@ -760,7 +729,7 @@ CTC (pH 7): ${formatSmart(data.CTC)} mmolc/dm³
 Saturação por Bases (V%): ${formatSmart(data.V)}%
 PRNT Calcário: ${formatSmart(data.PRNT)}%
 
-3. RECOMENDAÇÃO AGRONÔMICA
+4. RECOMENDAÇÃO AGRONÔMICA
 
 DIAGNÓSTICO:
 A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${formatSmart(data.clay)}% de Argila).
@@ -795,7 +764,7 @@ B) ADUBAÇÃO DE COBERTURA
    - Estádio V4 (4 folhas): Aplicar 100% da cobertura em solos argilosos/médios.
    - Parcelamento em Solos Arenosos: Aplicar 50% em V4 e 50% em V8 para reduzir perdas por lixiviação.
 
-4. MICRONUTRIENTES E ORGÂNICOS
+MICRONUTRIENTES E ORGÂNICOS:
    - Zinco (Zn): Recomenda-se 300-400 g/ha via foliar (V4-V6) ou 2 kg/ha via solo.
    - Boro (B): Recomenda-se 150-200 g/ha via foliar.
    - Matéria Orgânica: Opcionalmente, pode-se usar 15-20 t/ha de esterco de curral ou 4-6 t/ha de cama de frango para melhoria da estrutura do solo.
@@ -823,24 +792,69 @@ Sistema de Recomendação Agronômica (SRA)
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // Preencher dados do Export Oculto (DOC)
-            document.getElementById('doc_owner').innerText = data.owner;
-            document.getElementById('doc_prop').innerText = data.prop;
-            document.getElementById('doc_season').innerText = data.season.toUpperCase();
-            document.getElementById('doc_yield').innerText = data.yield;
-            document.getElementById('doc_texture').innerText = texClass;
-            document.getElementById('doc_clay').innerText = data.clay;
-            document.getElementById('doc_v').innerText = data.V;
-            // Atualizar o corpo do documento para usar o laudo completo (fidelidade ao visto em tela)
-            document.getElementById('doc_body_content').innerText = laudo;
-            
-            // Copiar tabela para o doc
-            document.getElementById('doc_table_container').innerHTML = `
+            // GERAR HTML PARA EXPORTAÇÃO (PDF/DOCX) COM ESTRUTURA IDÊNTICA
+            const exportHTML = `
+                <div class="doc-header">
+                    <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
+                    <p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p>
+                </div>
+
+                <div class="doc-section-title">1. DADOS DO PRODUTOR</div>
+                <div class="doc-text"><strong>Nome:</strong> ${data.owner}</div>
+
+                <div class="doc-section-title">2. DADOS DA PROPRIEDADE</div>
+                <div class="doc-text">
+                    <strong>Propriedade:</strong> ${data.prop}<br>
+                    <strong>Protocolo:</strong> ${document.getElementById('protocolId').value}<br>
+                    <strong>Safra:</strong> ${data.season.toUpperCase()} | <strong>Meta:</strong> ${data.yield} sc/ha<br>
+                    <strong>Sistema:</strong> ${document.getElementById('systemType').options[document.getElementById('systemType').selectedIndex].text}<br>
+                    <strong>Cultura Anterior:</strong> ${document.getElementById('prevCulture').options[document.getElementById('prevCulture').selectedIndex].text}
+                </div>
+
+                <div class="doc-section-title">3. DADOS ANALÍTICOS DA AMOSTRA</div>
+                <div class="doc-text">
+                    Argila: ${formatSmart(data.clay)}% | P: ${formatSmart(data.P)} mg/dm³ | K: ${formatSmart(data.K)} mmolc/dm³<br>
+                    Ca: ${formatSmart(data.Ca)} mmolc/dm³ | Mg: ${formatSmart(data.Mg)} mmolc/dm³ | SB: ${formatSmart(data.SB)} mmolc/dm³<br>
+                    CTC: ${formatSmart(data.CTC)} mmolc/dm³ | V%: ${formatSmart(data.V)}% | PRNT: ${formatSmart(data.PRNT)}%
+                </div>
+
+                <div class="doc-section-title">4. RECOMENDAÇÃO AGRONÔMICA</div>
+                <div class="doc-text">
+                    <strong>DIAGNÓSTICO:</strong><br>
+                    A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${formatSmart(data.clay)}% de Argila).
+                    A saturação por bases atual (V%) é de ${formatSmart(data.V)}%. O nível crítico recomendado para a cultura do milho é 70%.<br><br>
+
+                    <strong>CORREÇÃO DE ACIDEZ E PERFIL:</strong><br>
+                    > CALAGEM: Aplicar ${formatSmart(nc)} t/ha de Calcário ${limeType}.<br>
+                    > GESSAGEM: Sugere-se a aplicação de ${formatSmart(gessoTon)} t/ha de Gesso Agrícola.<br><br>
+
+                    <strong>PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K):</strong><br>
+                    - Nitrogênio (N): ${formatSmart(recN)} kg/ha${warningSafra}<br>
+                    - Fósforo (P2O5): ${formatSmart(recP)} kg/ha<br>
+                    - Potássio (K2O): ${formatSmart(recK)} kg/ha${warningSafra}<br><br>
+
+                    <strong>SUGESTÃO DE MANEJO E FONTES:</strong><br>
+                    A) SEMEADURA: ${formatSmart(map)} kg/ha de MAP e ${formatSmart(kcl/2)} kg/ha de KCl.<br>
+                    B) COBERTURA: ${formatSmart(urea)} kg/ha de Ureia e ${formatSmart(kcl/2)} kg/ha de KCl.<br><br>
+
+                    <strong>MICRONUTRIENTES E ORGÂNICOS:</strong><br>
+                    Zinco e Boro via foliar ou solo conforme disponibilidade. Uso de matéria orgânica recomendado.
+                </div>
+
+                <div class="doc-section-title">RESUMO TÉCNICO</div>
                 <table class="doc-table">
                     <thead><tr><th>Parâmetro</th><th>Valor Calculado</th><th>Unidade</th></tr></thead>
                     <tbody>${tbody.innerHTML}</tbody>
                 </table>
+
+                <div class="doc-footer">
+                    Documento gerado eletronicamente pelo SRA (Sistema de Recomendação Agronômica).<br>
+                    Responsável Técnico: __________________________________________________
+                </div>
             `;
+            
+            // Injeta o HTML gerado no container de exportação
+            document.getElementById('exportContent').innerHTML = exportHTML;
 
             // GRAVAÇÃO HÍBRIDA
             const reportObj = { date: new Date().toISOString(), owner: data.owner, result: laudo };
@@ -943,7 +957,7 @@ Sistema de Recomendação Agronômica (SRA)
 
             // Gerar e Salvar
             html2pdf().set(opt).from(element).save().then(() => {
-                // Limpeza (opcional, pois o clone não foi anexado ao DOM principal, mas se fosse, removeria aqui)
+                // Limpeza (opcional, pois o clone não foi anexado ao DOM principal)
             });
         };
 
