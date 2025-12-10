@@ -925,17 +925,18 @@ Sistema de Recomendação Agronômica (SRA)
             const originalContent = document.getElementById('exportContent');
             const element = originalContent.cloneNode(true);
             
-            // 2. CORREÇÃO DEFINITIVA: POSICIONAMENTO
-            // Usamos position: fixed e top negativo para garantir renderização sem visibilidade
+            // 2. CONFIGURAÇÃO DE RENDERIZAÇÃO
+            // Posiciona o elemento de forma que ele exista para o DOM, mas não seja visível
+            // e força background/cor para garantir que não seja transparente
             element.style.display = 'block';
-            element.style.position = 'fixed'; // Garante que fique "preso" à viewport
-            element.style.top = '-10000px';   // Move para fora da área visível superior
-            element.style.left = '0px';
-            element.style.width = '800px';    // Largura fixa A4
+            element.style.position = 'fixed'; 
+            element.style.left = '-9999px'; // Fora do viewport horizontalmente
+            element.style.top = '0px';
+            element.style.width = '800px'; 
             element.style.padding = '20px';
-            element.style.backgroundColor = 'white'; // Fundo branco obrigatório
-            element.style.color = 'black';           // Texto preto obrigatório
-            element.style.zIndex = '-9999';          // Garante que não sobreponha nada
+            element.style.backgroundColor = '#ffffff'; 
+            element.style.color = '#000000';
+            element.style.zIndex = '-9999';
             
             // 3. Anexar ao body
             document.body.appendChild(element);
@@ -947,30 +948,32 @@ Sistema de Recomendação Agronômica (SRA)
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2, 
-                    scrollY: 0, 
+                    scrollY: 0,
                     useCORS: true,
                     windowWidth: 800
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // 5. Gerar e exibir
-            html2pdf().set(opt).from(element).output('bloburl').then((pdfUrl) => {
-                currentPdfBlobUrl = pdfUrl; 
-                const iframe = document.getElementById('pdfPreviewFrame');
-                iframe.src = pdfUrl;
-                
-                // Remover elemento temporário
-                if(document.body.contains(element)) document.body.removeChild(element);
+            // 5. Delay para garantir renderização + Geração
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).output('bloburl').then((pdfUrl) => {
+                    currentPdfBlobUrl = pdfUrl; 
+                    const iframe = document.getElementById('pdfPreviewFrame');
+                    iframe.src = pdfUrl;
+                    
+                    // Remover elemento temporário
+                    if(document.body.contains(element)) document.body.removeChild(element);
 
-                // Abrir modal
-                const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
-                modal.show();
-            }).catch(err => {
-                console.error(err);
-                alert("Erro ao gerar visualização do PDF.");
-                if(document.body.contains(element)) document.body.removeChild(element);
-            });
+                    // Abrir modal
+                    const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
+                    modal.show();
+                }).catch(err => {
+                    console.error(err);
+                    alert("Erro ao gerar visualização do PDF.");
+                    if(document.body.contains(element)) document.body.removeChild(element);
+                });
+            }, 500); // 500ms de delay
         };
 
         // --- BAIXAR PDF A PARTIR DA VISUALIZAÇÃO ---
