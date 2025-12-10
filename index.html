@@ -919,44 +919,55 @@ Sistema de Recomendação Agronômica (SRA)
             }
         });
 
-        // --- VISUALIZAR PDF ---
+        // --- VISUALIZAR PDF (CORRIGIDO PARA EVITAR TELA BRANCA) ---
         window.openPdfPreview = () => {
-            // CORREÇÃO TELA BRANCA: CLONAR E ANEXAR AO BODY (ESCONDIDO)
+            // 1. Clonar o conteúdo
             const originalContent = document.getElementById('exportContent');
             const element = originalContent.cloneNode(true);
             
-            // Força estilos para renderização correta
+            // 2. Configurar estilos para garantir que o html2canvas "veja" o elemento
             element.style.display = 'block';
             element.style.position = 'absolute';
-            element.style.left = '-9999px'; // Esconde da visão do usuário
-            element.style.top = '0';
-            element.style.width = '800px'; 
+            element.style.top = '0px';
+            element.style.left = '0px'; // Coloca no topo esquerdo
+            element.style.width = '800px'; // Largura fixa A4 aprox
             element.style.padding = '20px';
-            element.style.background = 'white';
+            element.style.backgroundColor = 'white';
+            element.style.zIndex = '-9999'; // Esconde atrás do conteúdo principal
+            element.style.color = 'black'; 
             
-            // Anexa ao DOM para que o html2canvas consiga ler
+            // 3. Anexar ao body
             document.body.appendChild(element);
             
+            // 4. Opções do PDF
             const opt = {
                 margin: 10,
                 filename: `Laudo_${document.getElementById('ownerName').value}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
+                html2canvas: { 
+                    scale: 2, 
+                    scrollY: 0, 
+                    useCORS: true 
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Gerar o PDF como Blob URL
+            // 5. Gerar e exibir
             html2pdf().set(opt).from(element).output('bloburl').then((pdfUrl) => {
-                currentPdfBlobUrl = pdfUrl; // Salva a referência para o download
+                currentPdfBlobUrl = pdfUrl; 
                 const iframe = document.getElementById('pdfPreviewFrame');
                 iframe.src = pdfUrl;
                 
-                // Remove o elemento temporário do DOM
-                document.body.removeChild(element);
+                // Remover elemento temporário
+                if(document.body.contains(element)) document.body.removeChild(element);
 
-                // Abre o modal
+                // Abrir modal
                 const modal = new bootstrap.Modal(document.getElementById('pdfPreviewModal'));
                 modal.show();
+            }).catch(err => {
+                console.error(err);
+                alert("Erro ao gerar visualização do PDF.");
+                if(document.body.contains(element)) document.body.removeChild(element);
             });
         };
 
