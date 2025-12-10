@@ -925,16 +925,17 @@ Sistema de Recomendação Agronômica (SRA)
             const originalContent = document.getElementById('exportContent');
             const element = originalContent.cloneNode(true);
             
-            // 2. Configurar estilos para garantir que o html2canvas "veja" o elemento
+            // 2. CORREÇÃO DEFINITIVA: POSICIONAMENTO
+            // Usamos position: fixed e top negativo para garantir renderização sem visibilidade
             element.style.display = 'block';
-            element.style.position = 'absolute';
-            element.style.top = '0px';
-            element.style.left = '0px'; // Coloca no topo esquerdo
-            element.style.width = '800px'; // Largura fixa A4 aprox
+            element.style.position = 'fixed'; // Garante que fique "preso" à viewport
+            element.style.top = '-10000px';   // Move para fora da área visível superior
+            element.style.left = '0px';
+            element.style.width = '800px';    // Largura fixa A4
             element.style.padding = '20px';
-            element.style.backgroundColor = 'white';
-            element.style.zIndex = '-9999'; // Esconde atrás do conteúdo principal
-            element.style.color = 'black'; 
+            element.style.backgroundColor = 'white'; // Fundo branco obrigatório
+            element.style.color = 'black';           // Texto preto obrigatório
+            element.style.zIndex = '-9999';          // Garante que não sobreponha nada
             
             // 3. Anexar ao body
             document.body.appendChild(element);
@@ -947,7 +948,8 @@ Sistema de Recomendação Agronômica (SRA)
                 html2canvas: { 
                     scale: 2, 
                     scrollY: 0, 
-                    useCORS: true 
+                    useCORS: true,
+                    windowWidth: 800
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
