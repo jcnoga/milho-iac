@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRA Milho Profissional - Sistema Completo</title>
     
+    <!-- SEGURANÇA: Bloqueio de execução via protocolo file:// -->
+    <script>
+        if (window.location.protocol === "file:") {
+            alert("Por motivos de segurança, esta aplicação não pode ser executada diretamente do sistema de arquivos.\n\nPor favor, utilize um servidor local (localhost) ou a versão hospedada.");
+            document.documentElement.innerHTML = ""; // Limpa o conteúdo para impedir uso
+            throw new Error("Execução local bloqueada.");
+        }
+    </script>
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
@@ -449,6 +458,19 @@
             console.warn("Firebase não configurado. Adicione suas chaves no código.");
         }
 
+        // --- SEGURANÇA: FUNÇÃO DE SANITIZAÇÃO DE HTML (XSS PREVENTION) ---
+        function escapeHtml(text) {
+            if (!text) return "";
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
         // --- VARIÁVEIS GLOBAIS ---
         let currentUserData = null;
         let appState = { generatedCode: null, isDemo: false, isFreeExample: false, currentSamplePaid: false };
@@ -473,7 +495,8 @@
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) currentUserData = userSnap.data();
                 else {
-                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 3 };
+                    // ALTERAÇÃO: Créditos iniciais definidos para 50
+                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 50 };
                     await setDoc(userRef, currentUserData);
                 }
                 showAppUI();
@@ -510,8 +533,9 @@
             .catch(err => alert("Erro no Login: " + err.message));
         });
         document.getElementById('btnRegAction').addEventListener('click', () => {
+            // ALTERAÇÃO: Ao cadastrar, define créditos iniciais como 50
             createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value)
-            .then(cred => setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById('regName').value, email: cred.user.email, credits: 3 }))
+            .then(cred => setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById('regName').value, email: cred.user.email, credits: 50 }))
             .catch(err => alert("Erro no Cadastro: " + err.message));
         });
         document.getElementById('btnGoogleAction').addEventListener('click', () => {
@@ -852,6 +876,7 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
             // GERAR HTML PARA EXPORTAÇÃO (PDF/DOCX) COM ESTRUTURA IDÊNTICA E NOVOS CAMPOS
+            // SEGURANÇA: Usando escapeHtml para prevenir XSS nos dados do usuário
             const exportHTML = `
                 <div class="doc-header">
                     <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
@@ -859,12 +884,12 @@ Sistema de Recomendação Agronômica (SRA)
                 </div>
 
                 <div class="doc-section-title">1. DADOS DO PRODUTOR</div>
-                <div class="doc-text"><strong>Nome:</strong> ${data.owner}</div>
+                <div class="doc-text"><strong>Nome:</strong> ${escapeHtml(data.owner)}</div>
 
                 <div class="doc-section-title">2. DADOS DA PROPRIEDADE</div>
                 <div class="doc-text">
-                    <strong>Propriedade:</strong> ${data.prop}<br>
-                    <strong>Protocolo:</strong> ${document.getElementById('protocolId').value}<br>
+                    <strong>Propriedade:</strong> ${escapeHtml(data.prop)}<br>
+                    <strong>Protocolo:</strong> ${escapeHtml(document.getElementById('protocolId').value)}<br>
                     <strong>Safra:</strong> ${data.season.toUpperCase()} | <strong>Meta:</strong> ${data.yield} sc/ha<br>
                     <strong>Sistema:</strong> ${document.getElementById('systemType').options[document.getElementById('systemType').selectedIndex].text}<br>
                     <strong>Cultura Anterior:</strong> ${document.getElementById('prevCulture').options[document.getElementById('prevCulture').selectedIndex].text}
