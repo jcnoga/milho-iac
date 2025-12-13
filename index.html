@@ -597,7 +597,12 @@
             if(input.length < 6) return alert("Código inválido");
             const hash = parseInt(input.substring(0, 5));
             const qtd = parseInt(input.substring(5));
-            const expected = (appState.generatedCode + 13) * 9 + 1954;
+
+            // ALTERAÇÃO DE REFATORAÇÃO: Constantes nomeadas para segurança e legibilidade
+            const AUTH_OFFSET = 13;
+            const AUTH_MULTIPLIER = 9;
+            const AUTH_BASE = 1954;
+            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
 
             if (hash === expected && qtd > 0 && auth.currentUser) {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(qtd) });
