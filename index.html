@@ -100,6 +100,10 @@
             margin-top: 50px; padding-top: 10px; border-top: 1px solid #ccc; 
             text-align: center; font-size: 10px; color: #999; 
         }
+        
+        /* Cursor Pointer para o Logo */
+        .logo-nav { cursor: pointer; transition: opacity 0.2s; }
+        .logo-nav:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -163,28 +167,37 @@
 
         <!-- Token de Créditos -->
         <div id="tokenForm" class="auth-card" style="display:none;">
-            <h4 class="text-center fw-bold text-primary mb-2">Adicionar Créditos</h4>
-            
-            <!-- Link do WhatsApp para Suporte -->
-            <p class="text-center small text-muted">
-                <!-- O href será atualizado dinamicamente via JS com o código gerado -->
-                <a id="whatsappLink" href="#" target="_blank" class="text-decoration-none text-success fw-bold">
-                    <i class="fab fa-whatsapp"></i> Envie o código para o suporte (WhatsApp) (34) 99782-24990
-                </a>
-            </p>
+            <h4 class="text-center fw-bold text-primary mb-2">Comprar Créditos</h4>
+            <p class="text-muted text-center small mb-3">Siga os passos abaixo para liberar seu acesso.</p>
 
-            <div class="bg-light p-3 rounded text-center mb-4 border border-primary">
-                <span class="d-block small text-uppercase fw-bold text-muted">Código de Segurança</span>
+            <div class="bg-light p-3 rounded text-center mb-3 border border-primary">
+                <span class="d-block small text-uppercase fw-bold text-muted">Seu Código de Sistema</span>
                 <h1 class="text-dark fw-bold m-0 display-4" id="displayAuthCode">----</h1>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Senha de Liberação</label>
-                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="cole sua senha aqui: Senha-Dias">
-                <div class="form-text text-center text-muted small mt-2">Exemplo: 12345-30 (Senha-Dias: 30, 60, 90...)</div>
+
+            <!-- Formulário de Solicitação WhatsApp -->
+            <div class="mb-3 border-bottom pb-3">
+                <label class="form-label fw-bold">1. Solicitar via WhatsApp</label>
+                <p class="small text-muted mb-2">Informe quantos dias de acesso deseja adquirir (múltiplos de 30).</p>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    <input type="number" id="requestDays" class="form-control" placeholder="Ex: 30, 60, 90..." min="30" step="30">
+                </div>
+                <button class="btn btn-success w-100 fw-bold" onclick="sendWhatsappRequest()">
+                    <i class="fab fa-whatsapp me-2"></i> ENVIAR VIA WHATSAPP
+                </button>
             </div>
+
+            <!-- Validação -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">2. Validar Liberação</label>
+                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="Cole a Senha-Dias aqui">
+                <div class="form-text text-center text-muted small mt-1">Ex: 12345-30</div>
+            </div>
+            
             <div class="d-grid gap-2">
-                <button class="btn btn-success btn-lg fw-bold" id="btnTokenAction">VALIDAR CRÉDITOS</button>
-                <button class="btn btn-link text-danger" onclick="startUnauthorized()">Acessar Modo Demonstração</button>
+                <button class="btn btn-primary btn-lg fw-bold" id="btnTokenAction">VALIDAR CRÉDITOS</button>
+                <button class="btn btn-link text-secondary" onclick="showAppUI()">Cancelar / Voltar</button>
             </div>
         </div>
     </div>
@@ -194,7 +207,8 @@
         
         <header class="header-app sticky-top">
             <div class="container d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
+                <!-- LOGO NAVEGÁVEL -->
+                <div class="d-flex align-items-center logo-nav" onclick="window.location.reload()" title="Voltar ao Início">
                     <i class="fas fa-tractor fa-2x me-3"></i>
                     <div>
                         <h5 class="m-0 fw-bold">SRA Milho Profissional</h5>
@@ -202,6 +216,11 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
+                    
+                    <!-- BOTÃO DE COMPRA DEDICADO -->
+                    <button class="btn btn-warning btn-sm fw-bold me-3 text-dark shadow-sm" onclick="showTokenScreen()">
+                        <i class="fas fa-shopping-cart me-1"></i> Comprar Créditos
+                    </button>
                     
                     <!-- Contador e Aviso de Créditos -->
                     <div class="d-flex flex-column align-items-end me-3">
@@ -222,13 +241,10 @@
                             <i class="fas fa-user-circle me-1"></i> <span id="userNameDisplay">Usuário</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" onclick="showTokenScreen()"><i class="fas fa-plus-circle me-2"></i>Comprar Créditos</a></li>
+                            <!-- Link de Compra removido daqui -->
+                            <li><a class="dropdown-item" href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                         </ul>
                     </div>
-                    
-                    <button class="btn btn-sm btn-danger fw-bold ms-2" onclick="handleLogout()" title="Sair do Sistema">
-                        <i class="fas fa-sign-out-alt"></i> SAIR
-                    </button>
                 </div>
             </div>
         </header>
@@ -359,9 +375,8 @@
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button></div>
-                                    <div class="col-md-6"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
-                                    <!-- Botão PDF MODIFICADO -->
-                                    <div class="col-md-6"><button class="btn btn-danger w-100 fw-bold py-2" onclick="downloadPdfDirectly()"><i class="fas fa-file-pdf me-2"></i> Baixar Arquivo PDF</button></div>
+                                    <div class="col-md-12"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
+                                    <!-- Botão PDF REMOVIDO CONFORME SOLICITAÇÃO -->
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -496,8 +511,8 @@
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) currentUserData = userSnap.data();
                 else {
-                    // ALTERAÇÃO: Créditos iniciais definidos para 50
-                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 50 };
+                    // ALTERAÇÃO: Créditos iniciais definidos para 30 DIAS conforme solicitado
+                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 30 };
                     await setDoc(userRef, currentUserData);
                 }
                 showAppUI();
@@ -534,9 +549,9 @@
             .catch(err => alert("Erro no Login: " + err.message));
         });
         document.getElementById('btnRegAction').addEventListener('click', () => {
-            // ALTERAÇÃO: Ao cadastrar, define créditos iniciais como 50
+            // ALTERAÇÃO: Ao cadastrar, define créditos iniciais como 30
             createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value)
-            .then(cred => setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById('regName').value, email: cred.user.email, credits: 50 }))
+            .then(cred => setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById('regName').value, email: cred.user.email, credits: 30 }))
             .catch(err => alert("Erro no Cadastro: " + err.message));
         });
         document.getElementById('btnGoogleAction').addEventListener('click', () => {
@@ -549,11 +564,13 @@
         });
 
         // --- UI ---
-        function showAppUI() {
+        // Exposta globalmente para o botão "Cancelar/Voltar"
+        window.showAppUI = () => {
             els.authScreen.style.display = 'none';
             els.appContainer.style.display = 'block';
             updateHeader();
-        }
+        };
+        
         function showAuthUI(screen) {
             els.authScreen.style.display = 'flex';
             els.appContainer.style.display = 'none';
@@ -586,12 +603,26 @@
             document.getElementById('tokenForm').style.display = 'block';
             appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
             document.getElementById('displayAuthCode').innerText = appState.generatedCode;
-
-            // ATUALIZA O LINK DO WHATSAPP COM A MENSAGEM DINÂMICA E SOLICITAÇÃO DE DIAS
-            const baseMsg = `Olá, desejo adquirir créditos para recomendação. Código para referência: ${appState.generatedCode}. Desejo contratar: (informe 30, 60 ou 90) dias.`;
-            const encodedMsg = encodeURIComponent(baseMsg);
-            // Atualizado para o número solicitado (34) 99782-24990
-            document.getElementById('whatsappLink').href = `https://wa.me/55349978224990?text=${encodedMsg}`;
+            
+            // Limpa o input de dias ao abrir
+            document.getElementById('requestDays').value = "";
+        };
+        
+        // --- NOVA FUNÇÃO DE ENVIO VIA WHATSAPP ---
+        window.sendWhatsappRequest = () => {
+            const daysInput = document.getElementById('requestDays');
+            const days = parseInt(daysInput.value);
+            
+            if (isNaN(days) || days <= 0 || days % 30 !== 0) {
+                return alert("Por favor, informe uma quantidade de dias válida (múltiplos de 30: Ex: 30, 60, 90).");
+            }
+            
+            const code = appState.generatedCode;
+            const text = `Olá, solicito créditos para o sistema.\nCódigo do Sistema: ${code}\nDias Solicitados: ${days}`;
+            const encodedMsg = encodeURIComponent(text);
+            const targetNumber = "55349978224990"; // (34) 99782-24990
+            
+            window.open(`https://wa.me/${targetNumber}?text=${encodedMsg}`, '_blank');
         };
 
         document.getElementById('btnTokenAction').addEventListener('click', async () => {
@@ -620,7 +651,7 @@
             const AUTH_MULTIPLIER = 9;
             const AUTH_BASE = 1954;
             // Fórmula atualizada: (Código + Dias + 13) * 9 + 1954
-            const expected = (appState.generatedCode + days + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
+            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE + days;
 
             if (hash === expected && auth.currentUser) {
                 // Adiciona os dias como créditos (mantendo a funcionalidade existente de incrementar valor)
@@ -982,7 +1013,8 @@ Sistema de Recomendação Agronômica (SRA)
             }
         });
 
-        // --- NOVA FUNÇÃO: BAIXAR PDF DIRETAMENTE (SUBSTITUI VISUALIZAÇÃO EM TELA) ---
+        // --- NOVA FUNÇÃO: BAIXAR PDF DIRETAMENTE (CORRIGIDO ERRO DE RENDERIZAÇÃO) ---
+        // Se ainda for necessária a funcionalidade no futuro (código mantido, botão removido)
         window.downloadPdfDirectly = () => {
             // Mostrar Overlay de Carregamento
             document.getElementById('pdfLoadingOverlay').style.display = 'flex';
@@ -991,20 +1023,20 @@ Sistema de Recomendação Agronômica (SRA)
             const originalContent = document.getElementById('exportContent');
             const element = originalContent.cloneNode(true);
             
-            // 2. CORREÇÃO DEFINITIVA: 
-            // - Posiciona no topo esquerdo (visível para o html2canvas, mas fora da viewport)
+            // 2. CORREÇÃO DEFINITIVA (Erro de Download): 
+            // - Posiciona no topo esquerdo (0,0) atrás do overlay
+            // - NÃO usar coordenadas negativas grandes (-10000px) pois o html2canvas pode falhar
             element.style.display = 'block';
             element.style.position = 'absolute'; 
             
-            // Posicionar o elemento fora da tela (-10000px) evita que o Overlay branco cubra o elemento durante a captura.
-            element.style.left = '-10000px'; 
-            
+            // Posicionar o elemento no início, mas com z-index menor que o overlay (10000)
+            element.style.left = '0px'; 
             element.style.top = '0px';
             element.style.width = '800px'; 
             element.style.padding = '20px';
             element.style.backgroundColor = '#ffffff'; 
             element.style.color = '#000000';
-            element.style.zIndex = '9999'; 
+            element.style.zIndex = '9999'; // Fica visível para o script, mas escondido pelo overlay branco
             
             // 3. Anexar ao body
             document.body.appendChild(element);
@@ -1019,7 +1051,7 @@ Sistema de Recomendação Agronômica (SRA)
                     scale: 2, 
                     scrollY: 0, 
                     useCORS: true,
-                    windowWidth: 800
+                    // Remove windowWidth fixo se causar cortes, ajustado para capturar o elemento visível
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
@@ -1033,14 +1065,14 @@ Sistema de Recomendação Agronômica (SRA)
                     document.getElementById('pdfLoadingOverlay').style.display = 'none';
                 }).catch(err => {
                     console.error(err);
-                    alert("Erro ao gerar o PDF.");
+                    alert("Erro ao gerar o PDF. Verifique se o navegador bloqueou pop-ups.");
                     if(document.body.contains(element)) document.body.removeChild(element);
                     document.getElementById('pdfLoadingOverlay').style.display = 'none';
                 });
             }, 500); // Delay para renderização
         };
 
-        // --- BAIXAR PDF A PARTIR DA VISUALIZAÇÃO (MANTIDO CASO SEJA REATIVADO NO FUTURO, MAS NÃO USADO NO BOTÃO ATUAL) ---
+        // --- BAIXAR PDF A PARTIR DA VISUALIZAÇÃO (MANTIDO CASO SEJA REATIVADO NO FUTURO) ---
         window.downloadPdfFromPreview = () => {
             if (currentPdfBlobUrl) {
                 const link = document.createElement('a');
