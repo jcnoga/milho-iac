@@ -6,7 +6,6 @@
     <title>SRA Milho Profissional - Sistema Completo</title>
     
     <!-- SEGURANÇA: Bloqueio de execução via protocolo file:// -->
-    <!-- Para rodar localmente sem servidor, remova ou comente o bloco de script abaixo -->
     <script>
         if (window.location.protocol === "file:") {
             alert("Por motivos de segurança, esta aplicação não pode ser executada diretamente do sistema de arquivos.\n\nPor favor, utilize um servidor local (localhost) ou a versão hospedada.");
@@ -100,8 +99,8 @@
             margin-top: 50px; padding-top: 10px; border-top: 1px solid #ccc; 
             text-align: center; font-size: 10px; color: #999; 
         }
-        
-        /* Cursor Pointer para o Logo */
+
+        /* Estilo para Logo Navegável */
         .logo-nav { cursor: pointer; transition: opacity 0.2s; }
         .logo-nav:hover { opacity: 0.9; }
     </style>
@@ -168,16 +167,15 @@
         <!-- Token de Créditos -->
         <div id="tokenForm" class="auth-card" style="display:none;">
             <h4 class="text-center fw-bold text-primary mb-2">Comprar Créditos</h4>
-            <p class="text-muted text-center small mb-3">Siga os passos abaixo para liberar seu acesso.</p>
-
+            
             <div class="bg-light p-3 rounded text-center mb-3 border border-primary">
                 <span class="d-block small text-uppercase fw-bold text-muted">Seu Código de Sistema</span>
                 <h1 class="text-dark fw-bold m-0 display-4" id="displayAuthCode">----</h1>
             </div>
 
-            <!-- Formulário de Solicitação WhatsApp -->
+            <!-- Solicitação WhatsApp -->
             <div class="mb-3 border-bottom pb-3">
-                <label class="form-label fw-bold">1. Solicitar via WhatsApp</label>
+                <label class="form-label fw-bold small text-uppercase">1. Solicitar via WhatsApp</label>
                 <p class="small text-muted mb-2">Informe quantos dias de acesso deseja adquirir (múltiplos de 30).</p>
                 <div class="input-group mb-2">
                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -190,11 +188,11 @@
 
             <!-- Validação -->
             <div class="mb-3">
-                <label class="form-label fw-bold">2. Validar Liberação</label>
+                <label class="form-label fw-bold small text-uppercase">2. Validar Liberação</label>
                 <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="Cole a Senha-Dias aqui">
-                <div class="form-text text-center text-muted small mt-1">Ex: 12345-30</div>
+                <div class="form-text text-center text-muted small mt-1">Formato: Senha-Dias (Ex: 12345-30)</div>
             </div>
-            
+
             <div class="d-grid gap-2">
                 <button class="btn btn-primary btn-lg fw-bold" id="btnTokenAction">VALIDAR CRÉDITOS</button>
                 <button class="btn btn-link text-secondary" onclick="showAppUI()">Cancelar / Voltar</button>
@@ -217,7 +215,7 @@
                 </div>
                 <div class="d-flex align-items-center">
                     
-                    <!-- BOTÃO DE COMPRA DEDICADO -->
+                    <!-- BOTÃO DEDICADO DE COMPRA DE CRÉDITOS -->
                     <button class="btn btn-warning btn-sm fw-bold me-3 text-dark shadow-sm" onclick="showTokenScreen()">
                         <i class="fas fa-shopping-cart me-1"></i> Comprar Créditos
                     </button>
@@ -241,7 +239,6 @@
                             <i class="fas fa-user-circle me-1"></i> <span id="userNameDisplay">Usuário</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <!-- Link de Compra removido daqui -->
                             <li><a class="dropdown-item" href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                         </ul>
                     </div>
@@ -374,9 +371,14 @@
                                 <textarea id="finalReportText" class="form-control report-box shadow-sm mb-4" rows="20" readonly></textarea>
                                 <div class="row g-2">
                                     <div class="col-md-6"><button class="btn btn-success w-100 fw-bold py-3" onclick="shareWhatsapp()"><i class="fab fa-whatsapp me-2"></i> WhatsApp</button></div>
+                                    
+                                    <!-- NOVO BOTÃO PDF -->
+                                    <div class="col-md-6"><button class="btn btn-danger w-100 fw-bold py-3" onclick="downloadPdfDirectly()"><i class="fas fa-file-pdf me-2"></i> Baixar PDF</button></div>
+                                    
                                     <div class="col-md-6"><button class="btn btn-primary w-100 fw-bold py-3" onclick="downloadWord()"><i class="fas fa-file-word me-2"></i> Baixar Word (.docx)</button></div>
-                                    <div class="col-md-12"><button class="btn btn-secondary w-100 fw-bold py-2" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
-                                    <!-- Botão PDF REMOVIDO CONFORME SOLICITAÇÃO -->
+                                    
+                                    <!-- Ajustado para col-md-6 para manter a simetria -->
+                                    <div class="col-md-6"><button class="btn btn-secondary w-100 fw-bold py-3" onclick="sendEmail()"><i class="fas fa-envelope me-2"></i> Enviar por E-mail</button></div>
                                 </div>
                             </div>
                             <!-- Tabela -->
@@ -417,30 +419,7 @@
         </div>
     </div>
 
-    <!-- MANTIDO O MODAL NO CÓDIGO (EMBORA NÃO UTILIZADO NO DOWNLOAD DIRETO) PARA EVITAR REGRESSÕES VISUAIS OU DE LAYOUT -->
-    <div class="modal fade" id="pdfPreviewModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content" style="height: 90vh;">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title"><i class="fas fa-file-pdf me-2"></i>Visualização do Laudo PDF</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0 bg-light d-flex justify-content-center align-items-center">
-                    <!-- Iframe para mostrar o PDF -->
-                    <iframe id="pdfPreviewFrame" width="100%" height="100%" style="border:none;"></iframe>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-danger fw-bold" onclick="downloadPdfFromPreview()">
-                        <i class="fas fa-download me-2"></i> Baixar Arquivo PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- TEMPLATE OCULTO PARA EXPORTAÇÃO DOC/PDF -->
-    <!-- Conteúdo será injetado dinamicamente -->
     <div id="exportContent"></div>
 
     <!-- LÓGICA DO SISTEMA -->
@@ -477,13 +456,7 @@
         // --- SEGURANÇA: FUNÇÃO DE SANITIZAÇÃO DE HTML (XSS PREVENTION) ---
         function escapeHtml(text) {
             if (!text) return "";
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
             return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
@@ -511,7 +484,7 @@
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) currentUserData = userSnap.data();
                 else {
-                    // ALTERAÇÃO: Créditos iniciais definidos para 30 DIAS conforme solicitado
+                    // ALTERAÇÃO: Crédito de Avaliação 30 DIAS
                     currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 30 };
                     await setDoc(userRef, currentUserData);
                 }
@@ -543,13 +516,12 @@
             if(confirm("Deseja realmente sair?")) signOut(auth).then(() => location.reload());
         };
 
-        // Listeners Auth
         document.getElementById('btnLoginAction').addEventListener('click', () => {
             signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
             .catch(err => alert("Erro no Login: " + err.message));
         });
         document.getElementById('btnRegAction').addEventListener('click', () => {
-            // ALTERAÇÃO: Ao cadastrar, define créditos iniciais como 30
+            // ALTERAÇÃO: Crédito de Avaliação 30 DIAS
             createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPass').value)
             .then(cred => setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById('regName').value, email: cred.user.email, credits: 30 }))
             .catch(err => alert("Erro no Cadastro: " + err.message));
@@ -564,7 +536,6 @@
         });
 
         // --- UI ---
-        // Exposta globalmente para o botão "Cancelar/Voltar"
         window.showAppUI = () => {
             els.authScreen.style.display = 'none';
             els.appContainer.style.display = 'block';
@@ -585,7 +556,6 @@
                 els.creditBadges.innerText = currentUserData.credits;
                 els.userNameDisplay.innerText = currentUserData.name;
                 
-                // Aviso de Créditos Acabando
                 const warningEl = document.getElementById('lowCreditWarning');
                 if(currentUserData.credits < 3) {
                     warningEl.style.display = 'block';
@@ -603,12 +573,10 @@
             document.getElementById('tokenForm').style.display = 'block';
             appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
             document.getElementById('displayAuthCode').innerText = appState.generatedCode;
-            
-            // Limpa o input de dias ao abrir
-            document.getElementById('requestDays').value = "";
+            document.getElementById('requestDays').value = ""; // Limpa input
         };
         
-        // --- NOVA FUNÇÃO DE ENVIO VIA WHATSAPP ---
+        // --- FUNÇÃO ENVIO WHATSAPP ---
         window.sendWhatsappRequest = () => {
             const daysInput = document.getElementById('requestDays');
             const days = parseInt(daysInput.value);
@@ -620,41 +588,30 @@
             const code = appState.generatedCode;
             const text = `Olá, solicito créditos para o sistema.\nCódigo do Sistema: ${code}\nDias Solicitados: ${days}`;
             const encodedMsg = encodeURIComponent(text);
-            const targetNumber = "5534997824990"; // (34) 99782-4990
+            const targetNumber = "55349978224990"; 
             
             window.open(`https://wa.me/${targetNumber}?text=${encodedMsg}`, '_blank');
         };
 
         document.getElementById('btnTokenAction').addEventListener('click', async () => {
-            // Obter entrada e separar por hífen (Senha-Dias)
             const inputRaw = document.getElementById('inputToken').value.trim();
             const parts = inputRaw.split('-');
 
-            if(parts.length < 2) {
-                return alert("Formato inválido. Utilize o formato: Senha-Dias (Ex: 12345-30)");
-            }
+            if(parts.length < 2) return alert("Formato inválido. Utilize o formato: Senha-Dias (Ex: 12345-30)");
 
             const hash = parseInt(parts[0].replace(/\D/g, ''));
             const days = parseInt(parts[1].replace(/\D/g, ''));
 
-            if (isNaN(hash) || isNaN(days)) {
-                return alert("Código ou quantidade de dias inválidos.");
-            }
+            if (isNaN(hash) || isNaN(days)) return alert("Código ou quantidade de dias inválidos.");
+            if (days <= 0 || days % 30 !== 0) return alert("A quantidade de dias deve ser um múltiplo de 30.");
 
-            // Validação de múltiplos de 30
-            if (days <= 0 || days % 30 !== 0) {
-                return alert("A quantidade de dias deve ser um múltiplo de 30 (Ex: 30, 60, 90).");
-            }
-
-            // ALTERAÇÃO: Dias incorporados à fórmula da contra senha
+            // VALIDAÇÃO COM DIAS NA FÓRMULA
             const AUTH_OFFSET = 13;
             const AUTH_MULTIPLIER = 9;
             const AUTH_BASE = 1954;
-            // Fórmula atualizada: (Código + Dias + 13) * 9 + 1954
-            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE + days;
+            const expected = (appState.generatedCode + days + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
 
             if (hash === expected && auth.currentUser) {
-                // Adiciona os dias como créditos (mantendo a funcionalidade existente de incrementar valor)
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(days) });
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 currentUserData = snap.data();
@@ -665,8 +622,7 @@
             }
         });
 
-        // --- LÓGICA AGRONÔMICA IAC 100 COMPLETA (RESTAURADA) ---
-        
+        // --- LÓGICA AGRONÔMICA ---
         window.calculateSB = () => {
             const vals = ['soilCa', 'soilMg', 'soilK', 'soilNa'].map(id => parseFloat(document.getElementById(id).value)||0);
             document.getElementById('soilSB').value = vals.reduce((a,b)=>a+b,0).toFixed(2);
@@ -674,7 +630,7 @@
 
         window.triggerExampleData = () => {
             appState.isFreeExample = true;
-            appState.currentSamplePaid = false; // Reset just in case
+            appState.currentSamplePaid = false; 
             setStatus("SIMULAÇÃO GRÁTIS", "Dados fictícios gerados. Não consome créditos.", "alert-warning", "fa-magic", true);
             const rnd = (min,max) => (Math.random()*(max-min)+min).toFixed(1);
             
@@ -689,15 +645,11 @@
             document.getElementById('soilCTC').value = rnd(60, 110);
             document.getElementById('soilV').value = rnd(30, 65);
             
-            // --- Preenchimento Específico ---
             document.getElementById('cropSeason').value = 'verao';
             document.getElementById('prevCulture').value = 'milho';
             document.getElementById('systemType').value = 'conv';
-            
-            // NOVOS CAMPOS AUTOMÁTICOS
             document.getElementById('soilZn').value = rnd(0.5, 5.0);
             document.getElementById('soilB').value = rnd(0.1, 1.0);
-            // --------------------------------------------------------
 
             window.calculateSB();
             
@@ -711,7 +663,7 @@
 
         window.resetToRealMode = () => {
             appState.isFreeExample = false;
-            appState.currentSamplePaid = false; // RESET FLAG
+            appState.currentSamplePaid = false; 
             document.getElementById('statusAlert').style.display = 'none';
             document.querySelectorAll('#agronomicForm input, #agronomicForm select').forEach(el => { 
                 el.readOnly = false; el.classList.remove('demo-locked'); el.value = ''; 
@@ -719,43 +671,37 @@
                 if(el.id === 'limePRNT') el.value = 80;
             });
             els.btnCalc.innerHTML = '<i class="fas fa-check-circle me-2"></i> CALCULAR E GERAR LAUDO';
-            els.btnCalc.classList.replace('btn-warning', 'btn-success');
+            els.btnCalc.classList.replace('btn-success', 'btn-warning');
             document.getElementById('resultsSection').style.display = 'none';
         };
 
         document.getElementById('btnCalculate').addEventListener('click', async (e) => {
             e.preventDefault();
-
-            // --- VALIDAÇÃO DE ZEROS (APENAS P, Ca, Mg continuam obrigatórios) ---
             const vP = parseFloat(document.getElementById('soilP').value) || 0;
             const vCa = parseFloat(document.getElementById('soilCa').value) || 0;
             const vMg = parseFloat(document.getElementById('soilMg').value) || 0;
 
             if (vP === 0 || vCa === 0 || vMg === 0) {
-                alert("Atenção: Os valores de Fósforo (P), Cálcio (Ca) e Magnésio (Mg) são obrigatórios e não podem ser zero para o cálculo.");
+                alert("Atenção: Os valores de Fósforo (P), Cálcio (Ca) e Magnésio (Mg) são obrigatórios.");
                 return;
             }
             
             const isReal = !appState.isDemo && !appState.isFreeExample;
-            
             if (isReal) {
                 if (!auth.currentUser || !currentUserData) return alert("Faça login novamente.");
-                
-                // ONLY DEDUCT IF NOT ALREADY PAID FOR THIS SESSION
                 if (!appState.currentSamplePaid) {
                     if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
                     try {
                         await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
                         currentUserData.credits--;
                         updateHeader();
-                        appState.currentSamplePaid = true; // MARK AS PAID
+                        appState.currentSamplePaid = true; 
                     } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
                 }
             }
 
+            // ... (Cálculos mantidos conforme original) ...
             const get = id => parseFloat(document.getElementById(id).value)||0;
-            
-            // Pegar valores dos inputs (com ou sem valor, pois Zn e B são opcionais)
             const znVal = document.getElementById('soilZn').value;
             const bVal = document.getElementById('soilB').value;
 
@@ -767,14 +713,10 @@
                 prevCult: document.getElementById('prevCulture').value,
                 clay: get('soilClay'), P: get('soilP'), K: get('soilK'),
                 V: get('soilV'), CTC: get('soilCTC'), PRNT: get('limePRNT')||100,
-                Mg: get('soilMg'),
-                Ca: get('soilCa'),
-                SB: get('soilSB'),
-                Zn: znVal ? parseFloat(znVal) : null,
-                B: bVal ? parseFloat(bVal) : null
+                Mg: get('soilMg'), Ca: get('soilCa'), SB: get('soilSB'),
+                Zn: znVal ? parseFloat(znVal) : null, B: bVal ? parseFloat(bVal) : null
             };
 
-            // FUNÇÃO DE FORMATAÇÃO INTELIGENTE
             const formatSmart = (val) => {
                 const num = parseFloat(val);
                 if (isNaN(num)) return val;
@@ -782,7 +724,6 @@
                 return Math.round(num).toString();
             };
 
-            // --- CÁLCULOS IAC 100 COMPLETOS ---
             let texClass = "";
             if (data.clay <= 20) texClass = "Arenosa";
             else if (data.clay <= 60) texClass = "Média";
@@ -832,12 +773,9 @@
             const gessoTon = (data.clay * 50) / 1000;
 
             const dateStr = new Date().toLocaleDateString('pt-BR');
-            
-            // FORMATAÇÃO CONDICIONAL DE ZN E B PARA EXIBIÇÃO
             const znDisplay = data.Zn !== null ? `${formatSmart(data.Zn)} mg/dm³` : "Não Informado";
             const bDisplay = data.B !== null ? `${formatSmart(data.B)} mg/dm³` : "Não Informado";
 
-            // LAUDO TEXTUAL DETALHADO REESTRUTURADO
             const laudo = `
 LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA - MILHO
 Base Técnica: Boletim 100 IAC (2022)
@@ -911,11 +849,9 @@ MICRONUTRIENTES E ORGÂNICOS:
 Sistema de Recomendação Agronômica (SRA)
 `;
 
-            // Exibir Resultado
             document.getElementById('resultsSection').style.display = 'block';
             document.getElementById('finalReportText').value = laudo.trim();
             
-            // Tabela Técnica (Valores também formatados)
             const tbody = document.getElementById('techTableBody');
             tbody.innerHTML = `
                 <tr><td>Nec. Calagem</td><td>${formatSmart(nc)}</td><td>t/ha</td></tr>
@@ -930,17 +866,13 @@ Sistema de Recomendação Agronômica (SRA)
 
             document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth'});
 
-            // GERAR HTML PARA EXPORTAÇÃO (PDF/DOCX) COM ESTRUTURA IDÊNTICA E NOVOS CAMPOS
-            // SEGURANÇA: Usando escapeHtml para prevenir XSS nos dados do usuário
             const exportHTML = `
                 <div class="doc-header">
                     <h1 class="doc-title">LAUDO TÉCNICO DE RECOMENDAÇÃO AGRONÔMICA</h1>
                     <p class="doc-subtitle">SRA MILHO - Base Técnica: Boletim 100 IAC (2022)</p>
                 </div>
-
                 <div class="doc-section-title">1. DADOS DO PRODUTOR</div>
                 <div class="doc-text"><strong>Nome:</strong> ${escapeHtml(data.owner)}</div>
-
                 <div class="doc-section-title">2. DADOS DA PROPRIEDADE</div>
                 <div class="doc-text">
                     <strong>Propriedade:</strong> ${escapeHtml(data.prop)}<br>
@@ -949,7 +881,6 @@ Sistema de Recomendação Agronômica (SRA)
                     <strong>Sistema:</strong> ${document.getElementById('systemType').options[document.getElementById('systemType').selectedIndex].text}<br>
                     <strong>Cultura Anterior:</strong> ${document.getElementById('prevCulture').options[document.getElementById('prevCulture').selectedIndex].text}
                 </div>
-
                 <div class="doc-section-title">3. DADOS ANALÍTICOS DA AMOSTRA</div>
                 <div class="doc-text">
                     Argila: ${formatSmart(data.clay)}% | P: ${formatSmart(data.P)} mg/dm³ | K: ${formatSmart(data.K)} mmolc/dm³<br>
@@ -957,55 +888,44 @@ Sistema de Recomendação Agronômica (SRA)
                     CTC: ${formatSmart(data.CTC)} mmolc/dm³ | V%: ${formatSmart(data.V)}% | PRNT: ${formatSmart(data.PRNT)}%<br>
                     <strong>Zinco (Zn):</strong> ${znDisplay} | <strong>Boro (B):</strong> ${bDisplay}
                 </div>
-
                 <div class="doc-section-title">4. RECOMENDAÇÃO AGRONÔMICA</div>
                 <div class="doc-text">
                     <strong>DIAGNÓSTICO:</strong><br>
                     A análise de solo (0-20 cm) apresenta uma textura ${texClass.toUpperCase()} (${formatSmart(data.clay)}% de Argila).
                     A saturação por bases atual (V%) é de ${formatSmart(data.V)}%. O nível crítico recomendado para a cultura do milho é 70%.<br><br>
-
                     <strong>CORREÇÃO DE ACIDEZ E PERFIL:</strong><br>
                     > CALAGEM: Aplicar ${formatSmart(nc)} t/ha de Calcário ${limeType}.<br>
                     > GESSAGEM: Sugere-se a aplicação de ${formatSmart(gessoTon)} t/ha de Gesso Agrícola.<br><br>
-
                     <strong>PROGRAMA DE ADUBAÇÃO MINERAL (N-P-K):</strong><br>
                     - Nitrogênio (N): ${formatSmart(recN)} kg/ha${warningSafra}<br>
                     - Fósforo (P2O5): ${formatSmart(recP)} kg/ha<br>
                     - Potássio (K2O): ${formatSmart(recK)} kg/ha${warningSafra}<br><br>
-
                     <strong>SUGESTÃO DE MANEJO E FONTES:</strong><br>
                     A) SEMEADURA: ${formatSmart(map)} kg/ha de MAP e ${formatSmart(kcl/2)} kg/ha de KCl.<br>
                     B) COBERTURA: ${formatSmart(urea)} kg/ha de Ureia e ${formatSmart(kcl/2)} kg/ha de KCl.<br><br>
-
                     <strong>MICRONUTRIENTES E ORGÂNICOS:</strong><br>
                     Zinco e Boro via foliar ou solo conforme disponibilidade. Uso de matéria orgânica recomendado.
                 </div>
-
                 <div class="doc-section-title">RESUMO TÉCNICO</div>
                 <table class="doc-table">
                     <thead><tr><th>Parâmetro</th><th>Valor Calculado</th><th>Unidade</th></tr></thead>
                     <tbody>${tbody.innerHTML}</tbody>
                 </table>
-
                 <div class="doc-footer">
                     Documento gerado eletronicamente pelo SRA (Sistema de Recomendação Agronômica).<br>
                     Responsável Técnico: __________________________________________________
                 </div>
             `;
             
-            // Injeta o HTML gerado no container de exportação
             document.getElementById('exportContent').innerHTML = exportHTML;
 
-            // GRAVAÇÃO HÍBRIDA
             const reportObj = { date: new Date().toISOString(), owner: data.owner, result: laudo };
             
-            // 1. Nuvem
             if (isReal && document.getElementById('checkSaveCloud').checked && auth.currentUser) {
                 try {
                     await addDoc(collection(db, "users", auth.currentUser.uid, "reports"), { ...reportObj, timestamp: serverTimestamp() });
                 } catch(e) { console.error(e); }
             }
-            // 2. Local
             if (document.getElementById('checkSaveLocal').checked) {
                 const hist = JSON.parse(localStorage.getItem('sra_local_history')) || [];
                 hist.unshift(reportObj);
@@ -1013,35 +933,26 @@ Sistema de Recomendação Agronômica (SRA)
             }
         });
 
-        // --- NOVA FUNÇÃO: BAIXAR PDF DIRETAMENTE (CORRIGIDO ERRO DE RENDERIZAÇÃO) ---
-        // Se ainda for necessária a funcionalidade no futuro (código mantido, botão removido)
+        // --- CORREÇÃO DA FUNÇÃO DE DOWNLOAD PDF ---
         window.downloadPdfDirectly = () => {
-            // Mostrar Overlay de Carregamento
             document.getElementById('pdfLoadingOverlay').style.display = 'flex';
-
-            // 1. Clonar o conteúdo
             const originalContent = document.getElementById('exportContent');
             const element = originalContent.cloneNode(true);
+            element.removeAttribute('id');
             
-            // 2. CORREÇÃO DEFINITIVA (Erro de Download): 
-            // - Posiciona no topo esquerdo (0,0) atrás do overlay
-            // - NÃO usar coordenadas negativas grandes (-10000px) pois o html2canvas pode falhar
+            // CORREÇÃO: Posicionamento fixo atrás do conteúdo visível, mas renderizável
             element.style.display = 'block';
             element.style.position = 'absolute'; 
-            
-            // Posicionar o elemento no início, mas com z-index menor que o overlay (10000)
-            element.style.left = '0px'; 
-            element.style.top = '0px';
+            element.style.left = '0'; 
+            element.style.top = '0';
             element.style.width = '800px'; 
             element.style.padding = '20px';
             element.style.backgroundColor = '#ffffff'; 
             element.style.color = '#000000';
-            element.style.zIndex = '9999'; // Fica visível para o script, mas escondido pelo overlay branco
+            element.style.zIndex = '-1'; 
             
-            // 3. Anexar ao body
             document.body.appendChild(element);
             
-            // 4. Opções do PDF
             const owner = document.getElementById('ownerName').value || 'SRA';
             const opt = {
                 margin: 10,
@@ -1051,28 +962,24 @@ Sistema de Recomendação Agronômica (SRA)
                     scale: 2, 
                     scrollY: 0, 
                     useCORS: true,
-                    // Remove windowWidth fixo se causar cortes, ajustado para capturar o elemento visível
+                    windowWidth: 800
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // 5. Geração e Download Direto
             setTimeout(() => {
-                // Ao invés de .output('bloburl'), usamos .save() para baixar direto
                 html2pdf().set(opt).from(element).save().then(() => {
-                    // Limpar recursos
                     if(document.body.contains(element)) document.body.removeChild(element);
                     document.getElementById('pdfLoadingOverlay').style.display = 'none';
                 }).catch(err => {
                     console.error(err);
-                    alert("Erro ao gerar o PDF. Verifique se o navegador bloqueou pop-ups.");
+                    alert("Erro ao gerar o PDF.");
                     if(document.body.contains(element)) document.body.removeChild(element);
                     document.getElementById('pdfLoadingOverlay').style.display = 'none';
                 });
-            }, 500); // Delay para renderização
+            }, 800);
         };
 
-        // --- BAIXAR PDF A PARTIR DA VISUALIZAÇÃO (MANTIDO CASO SEJA REATIVADO NO FUTURO) ---
         window.downloadPdfFromPreview = () => {
             if (currentPdfBlobUrl) {
                 const link = document.createElement('a');
@@ -1081,12 +988,9 @@ Sistema de Recomendação Agronômica (SRA)
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            } else {
-                alert("Erro ao baixar o PDF.");
             }
         };
 
-        // --- HISTÓRICO LOCAL ---
         window.openHistoryModal = () => {
             const list = document.getElementById('localHistoryList');
             const data = JSON.parse(localStorage.getItem('sra_local_history')) || [];
@@ -1115,7 +1019,6 @@ Sistema de Recomendação Agronômica (SRA)
             }
         };
 
-        // --- UTILS ---
         function setStatus(title, msg, cls, icon, showReturn) {
             const el = document.getElementById('statusAlert');
             el.className = `alert shadow-sm ${cls}`;
@@ -1126,17 +1029,14 @@ Sistema de Recomendação Agronômica (SRA)
             document.getElementById('returnBtnContainer').style.display = showReturn ? 'block' : 'none';
         }
 
-        // --- EXPORTAR ---
         window.shareWhatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(document.getElementById('finalReportText').value)}`);
         
-        // FUNÇÃO DE ENVIO POR E-MAIL
         window.sendEmail = () => {
             const subject = "Laudo Técnico - SRA Milho";
             const body = encodeURIComponent(document.getElementById('finalReportText').value);
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         };
 
-        // EXPORTAR WORD (.DOCX)
         window.downloadWord = () => {
             const content = document.getElementById('exportContent').innerHTML;
             const htmlString = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Laudo Técnico</title><style>body { font-family: Arial, sans-serif; } .doc-header { border-bottom: 2px solid green; margin-bottom: 20px; } .doc-section-title { background: #f0f0f0; padding: 5px; font-weight: bold; margin-top: 15px; border-left: 5px solid green; } .doc-table { width: 100%; border-collapse: collapse; } .doc-table td, .doc-table th { border: 1px solid #999; padding: 5px; }</style></head><body>${content}</body></html>`;
