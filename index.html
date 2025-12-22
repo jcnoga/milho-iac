@@ -977,7 +977,11 @@ Sistema de Recomendação Agronômica (SRA)
             // - Define largura fixa e cores explícitas
             element.style.display = 'block';
             element.style.position = 'absolute'; // Absoluto em relação ao body
-            element.style.left = '0px'; 
+            
+            // ALTERAÇÃO PARA CORRIGIR PDF EM BRANCO:
+            // Posicionar o elemento fora da tela (-10000px) evita que o Overlay branco (Z-Index 10000) cubra o elemento durante a captura.
+            element.style.left = '-10000px'; 
+            
             element.style.top = '0px';
             element.style.width = '800px'; 
             element.style.padding = '20px';
