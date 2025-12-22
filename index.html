@@ -169,7 +169,7 @@
             <p class="text-center small text-muted">
                 <!-- O href será atualizado dinamicamente via JS com o código gerado -->
                 <a id="whatsappLink" href="#" target="_blank" class="text-decoration-none text-success fw-bold">
-                    <i class="fab fa-whatsapp"></i> Envie o código para o suporte (WhatsApp) 34-99782-4990
+                    <i class="fab fa-whatsapp"></i> Envie o código para o suporte (WhatsApp) (34) 99782-24990
                 </a>
             </p>
 
@@ -179,8 +179,8 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Senha de Liberação</label>
-                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="cole sua senha aqui: Senha-XX">
-                <div class="form-text text-center text-muted small mt-2">Exemplo: 1234-05 (Senha-Quantidade)</div>
+                <input type="text" id="inputToken" class="form-control text-center form-control-lg" placeholder="cole sua senha aqui: Senha-Dias">
+                <div class="form-text text-center text-muted small mt-2">Exemplo: 12345-30 (Senha-Dias: 30, 60, 90...)</div>
             </div>
             <div class="d-grid gap-2">
                 <button class="btn btn-success btn-lg fw-bold" id="btnTokenAction">VALIDAR CRÉDITOS</button>
@@ -587,32 +587,50 @@
             appState.generatedCode = Math.floor(Math.random() * 9000) + 1000;
             document.getElementById('displayAuthCode').innerText = appState.generatedCode;
 
-            // ATUALIZA O LINK DO WHATSAPP COM A MENSAGEM DINÂMICA
-            const baseMsg = `Olá, desejo adquirir créditos para recomendação. Código para referência: ${appState.generatedCode}__`;
+            // ATUALIZA O LINK DO WHATSAPP COM A MENSAGEM DINÂMICA E SOLICITAÇÃO DE DIAS
+            const baseMsg = `Olá, desejo adquirir créditos para recomendação. Código para referência: ${appState.generatedCode}. Desejo contratar: (informe 30, 60 ou 90) dias.`;
             const encodedMsg = encodeURIComponent(baseMsg);
-            document.getElementById('whatsappLink').href = `https://wa.me/5534997824990?text=${encodedMsg}`;
+            // Atualizado para o número solicitado (34) 99782-24990
+            document.getElementById('whatsappLink').href = `https://wa.me/55349978224990?text=${encodedMsg}`;
         };
 
         document.getElementById('btnTokenAction').addEventListener('click', async () => {
-            const input = document.getElementById('inputToken').value.replace(/\D/g, '');
-            if(input.length < 6) return alert("Código inválido");
-            const hash = parseInt(input.substring(0, 5));
-            const qtd = parseInt(input.substring(5));
+            // Obter entrada e separar por hífen (Senha-Dias)
+            const inputRaw = document.getElementById('inputToken').value.trim();
+            const parts = inputRaw.split('-');
 
-            // ALTERAÇÃO DE REFATORAÇÃO: Constantes nomeadas para segurança e legibilidade
+            if(parts.length < 2) {
+                return alert("Formato inválido. Utilize o formato: Senha-Dias (Ex: 12345-30)");
+            }
+
+            const hash = parseInt(parts[0].replace(/\D/g, ''));
+            const days = parseInt(parts[1].replace(/\D/g, ''));
+
+            if (isNaN(hash) || isNaN(days)) {
+                return alert("Código ou quantidade de dias inválidos.");
+            }
+
+            // Validação de múltiplos de 30
+            if (days <= 0 || days % 30 !== 0) {
+                return alert("A quantidade de dias deve ser um múltiplo de 30 (Ex: 30, 60, 90).");
+            }
+
+            // ALTERAÇÃO: Dias incorporados à fórmula da contra senha
             const AUTH_OFFSET = 13;
             const AUTH_MULTIPLIER = 9;
             const AUTH_BASE = 1954;
-            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
+            // Fórmula atualizada: (Código + Dias + 13) * 9 + 1954
+            const expected = (appState.generatedCode + days + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
 
-            if (hash === expected && qtd > 0 && auth.currentUser) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(qtd) });
+            if (hash === expected && auth.currentUser) {
+                // Adiciona os dias como créditos (mantendo a funcionalidade existente de incrementar valor)
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(days) });
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 currentUserData = snap.data();
-                alert("Créditos adicionados com sucesso!");
+                alert(`Sucesso! ${days} dias de créditos foram adicionados.`);
                 showAppUI();
             } else {
-                alert("Senha incorreta.");
+                alert("Senha incorreta ou inválida para a quantidade de dias informada.");
             }
         });
 
