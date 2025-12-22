@@ -609,7 +609,7 @@
             const AUTH_OFFSET = 13;
             const AUTH_MULTIPLIER = 9;
             const AUTH_BASE = 1954;
-            const expected = (appState.generatedCode + days + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
+            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE  + days;
 
             if (hash === expected && auth.currentUser) {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(days) });
