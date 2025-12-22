@@ -620,7 +620,7 @@
             const AUTH_MULTIPLIER = 9;
             const AUTH_BASE = 1954;
             // Fórmula atualizada: (Código + Dias + 13) * 9 + 1954
-            const expected = (appState.generatedCode + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE + days;
+            const expected = (appState.generatedCode + days + AUTH_OFFSET) * AUTH_MULTIPLIER + AUTH_BASE;
 
             if (hash === expected && auth.currentUser) {
                 // Adiciona os dias como créditos (mantendo a funcionalidade existente de incrementar valor)
