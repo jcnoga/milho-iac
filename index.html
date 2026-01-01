@@ -427,9 +427,10 @@
 
     <script type="module">
         // --- FIREBASE IMPORT ---
+        // ALTERAÇÃO: Adicionado 'onSnapshot' na importação para permitir atualizações em tempo real
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ==============================================================
         // ATENÇÃO: SUBSTITUA PELAS SUAS CHAVES DO FIREBASE ABAIXO
@@ -464,6 +465,7 @@
         let currentUserData = null;
         let appState = { generatedCode: null, isDemo: false, isFreeExample: false, currentSamplePaid: false };
         let currentPdfBlobUrl = null;
+        let unsubscribeUserListener = null; // Variável para controlar o listener do Firebase
 
         const els = {
             authScreen: document.getElementById('authScreen'),
@@ -477,19 +479,40 @@
             btnCalc: document.getElementById('btnCalculate')
         };
 
-        // --- AUTENTICAÇÃO ---
+        // --- AUTENTICAÇÃO E SINCRONIZAÇÃO EM TEMPO REAL ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) currentUserData = userSnap.data();
-                else {
-                    // ALTERAÇÃO: Crédito de Avaliação 30 DIAS
-                    currentUserData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 30 };
-                    await setDoc(userRef, currentUserData);
-                }
-                showAppUI();
+                
+                // ALTERAÇÃO: Substituição de 'getDoc' por 'onSnapshot' para atualizações em tempo real
+                // Isso permite que o Administrador altere os créditos no console e o app atualize instantaneamente
+                unsubscribeUserListener = onSnapshot(userRef, async (userSnap) => {
+                    if (userSnap.exists()) {
+                        currentUserData = userSnap.data();
+                        
+                        // Atualiza a interface imediatamente ao receber novos dados (ex: créditos alterados pelo admin)
+                        if (els.appContainer.style.display !== 'none') {
+                            updateHeader();
+                        } else {
+                            showAppUI();
+                        }
+                    } else {
+                        // Lógica original de criação de usuário se não existir
+                        // Crédito de Avaliação 30 DIAS
+                        const newData = { name: user.displayName || user.email.split('@')[0], email: user.email, credits: 30 };
+                        await setDoc(userRef, newData);
+                        // O setDoc disparará este listener novamente, caindo no 'if' acima
+                    }
+                }, (error) => {
+                    console.error("Erro ao sincronizar dados do usuário:", error);
+                });
+
             } else {
+                // Limpeza ao deslogar
+                if (unsubscribeUserListener) {
+                    unsubscribeUserListener();
+                    unsubscribeUserListener = null;
+                }
                 currentUserData = null;
                 showAuthUI('login');
             }
@@ -613,8 +636,8 @@
 
             if (hash === expected && auth.currentUser) {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(days) });
-                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                currentUserData = snap.data();
+                // Nota: O updateDoc acionará automaticamente o onSnapshot, atualizando a UI
+                // Removemos o 'getDoc' manual aqui para confiar no listener
                 alert(`Sucesso! ${days} dias de créditos foram adicionados.`);
                 showAppUI();
             } else {
@@ -693,8 +716,10 @@
                     if (currentUserData.credits <= 0) return alert("Saldo insuficiente. Adicione créditos.");
                     try {
                         await updateDoc(doc(db, "users", auth.currentUser.uid), { credits: increment(-1) });
-                        currentUserData.credits--;
-                        updateHeader();
+                        // Nota: currentUserData será atualizado automaticamente pelo onSnapshot,
+                        // mas para fluxo síncrono local, podemos decrementar manualmente aqui também
+                        // se desejarmos feedback instantâneo antes do roundtrip do servidor,
+                        // porém o onSnapshot é rápido o suficiente.
                         appState.currentSamplePaid = true; 
                     } catch(err) { return alert("Erro ao debitar crédito: " + err.message); }
                 }
